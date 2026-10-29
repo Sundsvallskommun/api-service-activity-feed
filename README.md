@@ -61,6 +61,10 @@ mvn spring-boot:run
 Med `MINA_ARENDEN_SEED=true` läses fem exempelhändelser in vid första start
 (`src/main/resources/exempel-kundhandelser.json`), så att frågor kan provas direkt.
 
+Fler testdata, 49 kundhändelser för privatpersoner och företag i en rad olika ärendetyper, läses in via API:t med
+`API_KEYS_ADMIN=<nyckel> ./tools/testdata/las-in.sh [bas-url] [kommun-id] [prefix]`. Kunderna har Skatteverkets
+testpersonnummer.
+
 ### Tester
 
 ```bash
@@ -82,7 +86,7 @@ verksamhetssystem (inläsning).
 - **Swagger UI:** [http://localhost:8080/](http://localhost:8080/) (även `/swagger-ui/index.html`). Knappen
   *Authorize* tar API-nyckeln.
 - **OpenAPI:** [http://localhost:8080/api-docs](http://localhost:8080/api-docs). Den incheckade specifikationen
-  (`src/test/resources/api/openapi.yaml`) jämförs med tjänstens i `OpenApiSpecificationIT`.
+  (`src/integration-test/resources/api/openapi.yaml`) jämförs med tjänstens i `OpenApiSpecificationIT`.
 
 ## Usage
 
@@ -186,18 +190,18 @@ tjänsten själv och maskeras i `toString()` (dept44 `PiiMasker`).
 
 ## Configuration
 
-|            Variabel             |                  Standard                   |                                      Beskrivning                                      |
-|---------------------------------|---------------------------------------------|---------------------------------------------------------------------------------------|
-| `DB_URL`                        | `jdbc:mariadb://localhost:3306/minaarenden` | JDBC-URL till MariaDB                                                                 |
-| `DB_USER`, `DB_PASSWORD`        | `minaarenden` / `minaarenden`               | Databasanvändare                                                                      |
-| `API_KEYS_ADMIN`                | tom                                         | Admin-nycklar, kommaseparerade. `ADMIN_API_KEY` läses om den inte är satt             |
-| `API_KEYS_FRAGA`                | tom                                         | Fråge-nycklar, kommaseparerade                                                        |
-| `MINA_ARENDEN_MUNICIPALITY_ID`  | `2281`                                      | Kommun-id för producenten; befintliga rader utan kommun får detta id vid uppgradering |
-| `MINA_ARENDEN_PRODUCENT`        | `Referenskommunen`                          | Producentens namn i svaren                                                            |
-| `MINA_ARENDEN_PREFIX`           | `REFKOM`                                    | Producentprefix i kundhändelsetyper (versaler A-Z)                                    |
-| `MINA_ARENDEN_STANDARD_VERSION` | `6.1`                                       | Standardversion som anges i `version`                                                 |
-| `MINA_ARENDEN_SEED`             | `false`                                     | Läs in exempelhändelser om kommunen saknar kundhändelser (endast demo)                |
-| `SERVER_PORT`                   | `8080`                                      | Lyssningsport                                                                         |
+|            Variabel             |                  Standard                   |                                Beskrivning                                |
+|---------------------------------|---------------------------------------------|---------------------------------------------------------------------------|
+| `DB_URL`                        | `jdbc:mariadb://localhost:3306/minaarenden` | JDBC-URL till MariaDB                                                     |
+| `DB_USER`, `DB_PASSWORD`        | `minaarenden` / `minaarenden`               | Databasanvändare                                                          |
+| `API_KEYS_ADMIN`                | tom                                         | Admin-nycklar, kommaseparerade. `ADMIN_API_KEY` läses om den inte är satt |
+| `API_KEYS_FRAGA`                | tom                                         | Fråge-nycklar, kommaseparerade                                            |
+| `MINA_ARENDEN_MUNICIPALITY_ID`  | `2281`                                      | Kommun-id för producenten                                                 |
+| `MINA_ARENDEN_PRODUCENT`        | `Referenskommunen`                          | Producentens namn i svaren                                                |
+| `MINA_ARENDEN_PREFIX`           | `REFKOM`                                    | Producentprefix i kundhändelsetyper (versaler A-Z)                        |
+| `MINA_ARENDEN_STANDARD_VERSION` | `6.1`                                       | Standardversion som anges i `version`                                     |
+| `MINA_ARENDEN_SEED`             | `false`                                     | Läs in exempelhändelser om kommunen saknar kundhändelser (endast demo)    |
+| `SERVER_PORT`                   | `8080`                                      | Lyssningsport                                                             |
 
 `MINA_ARENDEN_MUNICIPALITY_ID`, `MINA_ARENDEN_PRODUCENT` och `MINA_ARENDEN_PREFIX` fyller i den enda producenten i
 `minaarenden.producenter`. Ska en instans vara producent för flera kommuner anges hela listan med indexerade
@@ -210,8 +214,7 @@ variabler, eftersom en lista från miljövariabler ersätter listan i `applicati
 Schemat ägs av [Flyway](https://github.com/flyway/flyway) (`src/main/resources/db/migration`) och migreras framåt vid
 varje start; `clean` är avstängt och Hibernate får bara validera schemat. Ändra modellen genom att lägga till en ny
 migration (och uppdatera `src/test/resources/db/schema/schema.sql`, som `SchemaVerificationTest` jämför med), aldrig
-genom att ändra en befintlig: checksumman i `flyway_schema_history` stoppar annars starten. `V1` är undantagen från
-formateringen av samma skäl.
+genom att ändra en befintlig: checksumman i `flyway_schema_history` stoppar annars starten.
 
 ```
 kundhandelse
@@ -229,18 +232,6 @@ kundhandelse_tagg
 
 Första versionen deployas till Dokploy som Compose-tjänst med intern databas. Steg för steg, API-nycklar, omdeploy,
 säkerhetskopior och återställning: **[docs/dokploy.md](docs/dokploy.md)**.
-
-## Ändringar mot den Gradle-baserade versionen
-
-- Maven med `dept44-service-parent` i stället för Gradle; Java 25 och Spring Boot 4.
-- Sökvägarna har kommun-id först: `/{municipalityId}/kundhandelseFragaSynkron`, `/{municipalityId}/kundhandelser`.
-  Vidareförmedlingstjänstens bas-URL behöver kompletteras med kommun-id.
-- `CLIENT_ID`/`CLIENT_SECRET` och profilen `production` finns inte längre. Alla anrop kräver API-nyckel (`X-API-Key`);
-  en befintlig `ADMIN_API_KEY` fungerar som admin-nyckel om den är minst 32 tecken.
-- Ärendecachen svarar med RFC 9457 vid fel. Frågegränssnittet behåller `{"message": "..."}`.
-- Swagger UI på `/`, OpenAPI på `/api-docs`.
-- Befintlig data behålls: Flyway-migreringen `V2` lägger till kommun-id (från `MINA_ARENDEN_MUNICIPALITY_ID`) på
-  befintliga rader, och Compose-volymen har samma namn som tidigare.
 
 ## Avgränsningar
 
@@ -263,3 +254,12 @@ Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/Sunds
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+## Code status
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Sundsvallskommun_api-service-activity-feed&metric=alert_status)](https://sonarcloud.io/summary/overall?id=Sundsvallskommun_api-service-activity-feed)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Sundsvallskommun_api-service-activity-feed&metric=reliability_rating)](https://sonarcloud.io/summary/overall?id=Sundsvallskommun_api-service-activity-feed)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Sundsvallskommun_api-service-activity-feed&metric=security_rating)](https://sonarcloud.io/summary/overall?id=Sundsvallskommun_api-service-activity-feed)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Sundsvallskommun_api-service-activity-feed&metric=sqale_rating)](https://sonarcloud.io/summary/overall?id=Sundsvallskommun_api-service-activity-feed)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Sundsvallskommun_api-service-activity-feed&metric=vulnerabilities)](https://sonarcloud.io/summary/overall?id=Sundsvallskommun_api-service-activity-feed)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Sundsvallskommun_api-service-activity-feed&metric=bugs)](https://sonarcloud.io/summary/overall?id=Sundsvallskommun_api-service-activity-feed)

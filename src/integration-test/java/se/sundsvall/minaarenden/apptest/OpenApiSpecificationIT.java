@@ -21,8 +21,8 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static net.javacrumbs.jsonunit.core.Option.IGNORING_ARRAY_ORDER;
 
 /**
- * Jämför tjänstens OpenAPI-specifikation med den incheckade (src/test/resources/api/openapi.yaml). Ändras API:et
- * skrivs den nya specifikationen till target/api.yaml; granska och kopiera den till den incheckade filen.
+ * Jämför tjänstens OpenAPI-specifikation med den incheckade (src/integration-test/resources/api/openapi.yaml).
+ * Ändras API:et skrivs den nya specifikationen till target/api.yaml; granska och kopiera den till den incheckade filen.
  */
 @ActiveProfiles("it")
 @AutoConfigureTestRestTemplate

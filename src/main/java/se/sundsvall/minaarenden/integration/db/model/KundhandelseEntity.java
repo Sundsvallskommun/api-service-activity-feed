@@ -6,8 +6,6 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -22,9 +20,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import org.hibernate.annotations.UuidGenerator;
 import se.sundsvall.dept44.util.PiiMasker;
 
-import static org.hibernate.Length.LONG16;
+import static org.hibernate.Length.LONG32;
 
 /**
  * En kundhändelse i ärendecachen. Fälten motsvarar objektet kundhandelse i API-specifikationen, kompletterat med
@@ -32,7 +31,7 @@ import static org.hibernate.Length.LONG16;
  */
 @Entity
 @Table(name = "kundhandelse",
-	uniqueConstraints = @UniqueConstraint(name = "uq_kundhandelse_municipality_id_kundhandelse_id", columnNames = {
+	uniqueConstraints = @UniqueConstraint(name = KundhandelseEntity.UNIK_KUNDHANDELSE_ID, columnNames = {
 		"municipality_id", "kundhandelse_id"
 	}),
 	indexes = {
@@ -43,13 +42,16 @@ import static org.hibernate.Length.LONG16;
 	})
 public class KundhandelseEntity implements Serializable {
 
+	/** Det unika villkoret för kundhandelseId inom kommunen. */
+	public static final String UNIK_KUNDHANDELSE_ID = "uq_kundhandelse_municipality_id_kundhandelse_id";
+
 	@Serial
 	private static final long serialVersionUID = 4034813525227427812L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private Long id;
+	@UuidGenerator
+	@Column(name = "id", nullable = false, length = 255)
+	private String id;
 
 	@Column(name = "municipality_id", nullable = false, length = 4)
 	private String municipalityId;
@@ -78,7 +80,7 @@ public class KundhandelseEntity implements Serializable {
 	@Column(name = "rubrik", nullable = false)
 	private String rubrik;
 
-	@Column(name = "beskrivning", nullable = false, length = LONG16)
+	@Column(name = "beskrivning", nullable = false, length = LONG32)
 	private String beskrivning;
 
 	@Column(name = "sprak", nullable = false, length = 10)
@@ -99,10 +101,10 @@ public class KundhandelseEntity implements Serializable {
 	@Column(name = "version", nullable = false, length = 10)
 	private String version;
 
-	@Column(name = "utokad_information", length = LONG16)
+	@Column(name = "utokad_information", length = LONG32)
 	private String utokadInformation;
 
-	@Column(name = "referenser", length = LONG16)
+	@Column(name = "referenser", length = LONG32)
 	private String referenser;
 
 	@Column(name = "skapad", nullable = false)
@@ -133,15 +135,15 @@ public class KundhandelseEntity implements Serializable {
 		andrad = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 	}
 
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(final Long id) {
+	public void setId(final String id) {
 		this.id = id;
 	}
 
-	public KundhandelseEntity withId(final Long id) {
+	public KundhandelseEntity withId(final String id) {
 		this.id = id;
 		return this;
 	}

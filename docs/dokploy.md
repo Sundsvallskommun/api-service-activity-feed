@@ -189,19 +189,6 @@ bytt `DB_PASSWORD`, kontroll av data och säkerhetskopia) testas i CI med `docke
 - Byte av `DB_ROOT_PASSWORD` efter första deploy gör att `db-prepare` inte kan logga in och deployen stoppas (datat
   finns kvar). Sätt tillbaka det gamla värdet.
 
-### Uppgradera från den Gradle-baserade versionen
-
-Den tidigare versionen använde samma compose-tjänster och samma volymnamn (`mariadb-data`), så datat följer med:
-
-1. Sätt `API_KEYS_ADMIN` (eller behåll `ADMIN_API_KEY` om den är minst 32 tecken) och gärna `API_KEYS_FRAGA`.
-   `CLIENT_ID`, `CLIENT_SECRET` och `SPRING_PROFILES_ACTIVE=production` används inte längre och kan tas bort.
-2. Sätt `MINA_ARENDEN_MUNICIPALITY_ID` till kommunens id. Flyway-migreringen `V2` ger alla befintliga kundhändelser
-   det id:t.
-3. Om `DB_ROOT_PASSWORD` inte var satt tidigare: låt den vara osatt (root-lösenordet är då `DB_PASSWORD`, som förut).
-4. Deploy. `db-prepare` tar en säkerhetskopia innan migreringen körs.
-5. Uppdatera klienternas URL:er: `/kundhandelseFragaSynkron` blir `/{municipalityId}/kundhandelseFragaSynkron` och
-   `/kundhandelser` blir `/{municipalityId}/kundhandelser`.
-
 ## Säkerhetskopior och återställning
 
 Säkerhetskopiorna (`minaarenden-ÅÅÅÅMMDDTHHMMSSZ.sql.gz`) ligger i volymen `mariadb-backups` på Dokploy-servern. För

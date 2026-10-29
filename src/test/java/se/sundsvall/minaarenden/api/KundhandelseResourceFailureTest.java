@@ -30,7 +30,7 @@ import static se.sundsvall.minaarenden.service.TestdataFactory.nyKundhandelse;
 @AutoConfigureWebTestClient
 @SpringBootTest(classes = Application.class, webEnvironment = RANDOM_PORT)
 @ActiveProfiles("junit")
-class KundhandelseResourceFailuresTest {
+class KundhandelseResourceFailureTest {
 
 	@MockitoBean
 	private KundhandelseService kundhandelseService;

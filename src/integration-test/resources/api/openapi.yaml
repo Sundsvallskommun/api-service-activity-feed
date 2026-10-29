@@ -11,30 +11,30 @@ info:
     url: https://opensource.org/licenses/MIT
   version: "1.0"
 servers:
-- url: http://localhost:40709
-  description: Generated server url
+  - url: http://localhost:64053
+    description: Generated server url
 security:
-- ApiKey: []
+  - ApiKey: []
 tags:
-- name: Ärendecache
-  description: "Läs in, hämta och ta bort kundhändelser i cachen"
-- name: Kundhändelser
-  description: Fråga om kundhändelser (Mina ärendens standard)
+  - name: Ärendecache
+    description: "Läs in, hämta och ta bort kundhändelser i cachen"
+  - name: Kundhändelser
+    description: Fråga om kundhändelser (Mina ärendens standard)
 paths:
   /{municipalityId}/kundhandelser:
     get:
       tags:
-      - Ärendecache
+        - Ärendecache
       summary: Antal kundhändelser i cachen för kommunen
       operationId: antalKundhandelser
       parameters:
-      - name: municipalityId
-        in: path
-        description: Kommun-id
-        required: true
-        schema:
-          type: string
-        example: 2281
+        - name: municipalityId
+          in: path
+          description: Kommun-id
+          required: true
+          schema:
+            type: string
+          example: 2281
       responses:
         "200":
           description: Lyckat anrop
@@ -48,8 +48,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: "#/components/schemas/Problem"
-                - $ref: "#/components/schemas/ConstraintViolationProblem"
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
         "401":
           description: API-nyckel saknas eller är ogiltig
           content:
@@ -76,20 +76,20 @@ paths:
                 $ref: "#/components/schemas/Problem"
     post:
       tags:
-      - Ärendecache
+        - Ärendecache
       summary: Lägg till eller ersätt kundhändelser
       description: Skicka en lista med högst 1000 kundhändelser. Befintlig kundhändelse
         med samma kundhandelseId ersätts. Listan sparas i en transaktion; vid 409
         (samtidig inläsning av samma nya kundhandelseId) kan anropet skickas om oförändrat.
       operationId: sparaKundhandelser
       parameters:
-      - name: municipalityId
-        in: path
-        description: Kommun-id
-        required: true
-        schema:
-          type: string
-        example: 2281
+        - name: municipalityId
+          in: path
+          description: Kommun-id
+          required: true
+          schema:
+            type: string
+          example: 2281
       requestBody:
         content:
           application/json:
@@ -117,8 +117,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: "#/components/schemas/Problem"
-                - $ref: "#/components/schemas/ConstraintViolationProblem"
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
         "401":
           description: API-nyckel saknas eller är ogiltig
           content:
@@ -146,7 +146,7 @@ paths:
   /{municipalityId}/kundhandelseFragaSynkron:
     post:
       tags:
-      - Kundhändelser
+        - Kundhändelser
       summary: Hämta kundhändelser för en eller flera parter (synkron fråga)
       description: "Besvarar frågan ur ärendecachen. Parter kan anges som kund, ä\
         rende eller båda. Filtrera med kundhandelseTyper (prefix matchar underliggande\
@@ -154,30 +154,30 @@ paths:
         \ paginering kräver sortering. Kräver en fråge- eller admin-nyckel."
       operationId: kundhandelseFragaSynkron
       parameters:
-      - name: municipalityId
-        in: path
-        description: Kommun-id
-        required: true
-        schema:
-          type: string
-        example: 2281
-      - name: skv_client_correlation_id
-        in: header
-        description: "Unikt id per anrop som följer anropskedjan från konsument via\
+        - name: municipalityId
+          in: path
+          description: Kommun-id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: skv_client_correlation_id
+          in: header
+          description: "Unikt id per anrop som följer anropskedjan från konsument via\
           \ Skatteverket. Tjänstebeskrivningen anger UUID; API-definitionen tillå\
           ter valfritt format. Här krävs skrivbara ASCII-tecken, högst 200 tecken."
-        required: true
-        schema:
-          type: string
-          pattern: "^(?=.*[\\x21-\\x7E])[\\x20-\\x7E]{1,200}$"
-        example: 0002aa29-49f2-4baf-be51-c7c39c9824b4
-      - name: Accept-Language
-        in: header
-        description: Önskat språk
-        required: false
-        schema:
-          type: string
-        example: sv
+          required: true
+          schema:
+            type: string
+            pattern: "^(?=.*[\\x21-\\x7E])[\\x20-\\x7E]{1,200}$"
+          example: 0002aa29-49f2-4baf-be51-c7c39c9824b4
+        - name: Accept-Language
+          in: header
+          description: Önskat språk
+          required: false
+          schema:
+            type: string
+          example: sv
       requestBody:
         content:
           application/json:
@@ -218,26 +218,26 @@ paths:
   /{municipalityId}/kundhandelser/{kundhandelseId}:
     get:
       tags:
-      - Ärendecache
+        - Ärendecache
       summary: Hämta en kundhändelse ur cachen
       operationId: hamtaKundhandelse
       parameters:
-      - name: municipalityId
-        in: path
-        description: Kommun-id
-        required: true
-        schema:
-          type: string
-        example: 2281
-      - name: kundhandelseId
-        in: path
-        description: Kundhändelsens id
-        required: true
-        schema:
-          type: string
-          maxLength: 100
-          minLength: 0
-        example: REFKOM-BYGG-2026-00123-1
+        - name: municipalityId
+          in: path
+          description: Kommun-id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: kundhandelseId
+          in: path
+          description: Kundhändelsens id
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+            minLength: 0
+          example: REFKOM-BYGG-2026-00123-1
       responses:
         "200":
           description: Lyckat anrop
@@ -251,8 +251,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: "#/components/schemas/Problem"
-                - $ref: "#/components/schemas/ConstraintViolationProblem"
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
         "401":
           description: API-nyckel saknas eller är ogiltig
           content:
@@ -279,26 +279,26 @@ paths:
                 $ref: "#/components/schemas/Problem"
     delete:
       tags:
-      - Ärendecache
+        - Ärendecache
       summary: Ta bort en kundhändelse ur cachen
       operationId: taBortKundhandelse
       parameters:
-      - name: municipalityId
-        in: path
-        description: Kommun-id
-        required: true
-        schema:
-          type: string
-        example: 2281
-      - name: kundhandelseId
-        in: path
-        description: Kundhändelsens id
-        required: true
-        schema:
-          type: string
-          maxLength: 100
-          minLength: 0
-        example: REFKOM-BYGG-2026-00123-1
+        - name: municipalityId
+          in: path
+          description: Kommun-id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: kundhandelseId
+          in: path
+          description: Kundhändelsens id
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+            minLength: 0
+          example: REFKOM-BYGG-2026-00123-1
       responses:
         "204":
           description: Borttagen
@@ -308,8 +308,8 @@ paths:
             application/problem+json:
               schema:
                 oneOf:
-                - $ref: "#/components/schemas/Problem"
-                - $ref: "#/components/schemas/ConstraintViolationProblem"
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
         "401":
           description: API-nyckel saknas eller är ogiltig
           content:
@@ -337,7 +337,7 @@ paths:
   /api-docs:
     get:
       tags:
-      - API
+        - API
       summary: OpenAPI
       operationId: getApiDocs
       responses:
@@ -355,16 +355,16 @@ components:
     Problem:
       type: object
       properties:
+        title:
+          type: string
+        detail:
+          type: string
         instance:
           type: string
           format: uri
         type:
           type: string
           format: uri
-        title:
-          type: string
-        detail:
-          type: string
         status:
           type: integer
           format: int32
@@ -376,24 +376,24 @@ components:
           type: string
           description: Ett värde som unikt identifierar ärendet
           examples:
-          - BYGG-2026-00123
+            - BYGG-2026-00123
           maxLength: 100
           minLength: 0
         typ:
           type: string
           description: Typ av identifierare
           enum:
-          - Konsumentreferens
-          - Producentarendereferens
-          - Diarienummer
-          - Kvittensnummer
+            - Konsumentreferens
+            - Producentarendereferens
+            - Diarienummer
+            - Kvittensnummer
           examples:
-          - Diarienummer
+            - Diarienummer
           minLength: 1
           pattern: ^(Konsumentreferens|Producentarendereferens|Diarienummer|Kvittensnummer)$
       required:
-      - identifierare
-      - typ
+        - identifierare
+        - typ
     Kund:
       type: object
       description: Vem frågan gäller
@@ -402,13 +402,13 @@ components:
           type: string
           description: "Ett värde som unikt identifierar kunden, 12 siffror"
           examples:
-          - "199009090000"
+            - "199009090000"
           minLength: 1
           pattern: "^\\d{12}$"
         tillagg:
           type:
-          - string
-          - "null"
+            - string
+            - "null"
           description: Löpnummer som skiljer flera enskilda firmor åt
           maxLength: 20
           minLength: 0
@@ -416,16 +416,16 @@ components:
           type: string
           description: Typ av identifierare
           enum:
-          - Personnummer
-          - Organisationsnummer
-          - Samordningsnummer
+            - Personnummer
+            - Organisationsnummer
+            - Samordningsnummer
           examples:
-          - Personnummer
+            - Personnummer
           minLength: 1
           pattern: ^(Personnummer|Organisationsnummer|Samordningsnummer)$
       required:
-      - identifierare
-      - typ
+        - identifierare
+        - typ
     NyKundhandelse:
       type: object
       description: "Kundhändelse att lägga i ärendecachen. producent, sprak och version\
@@ -434,7 +434,7 @@ components:
         kundhandelseId:
           type: string
           examples:
-          - REFKOM-BYGG-2026-00123-3
+            - REFKOM-BYGG-2026-00123-3
           maxLength: 100
           minLength: 0
         part:
@@ -442,20 +442,20 @@ components:
         rubrik:
           type: string
           examples:
-          - Beslut om bygglov
+            - Beslut om bygglov
           maxLength: 255
           minLength: 0
         beskrivning:
           type: string
           examples:
-          - Bygglov har beviljats. Beslutet finns på Mina sidor.
+            - Bygglov har beviljats. Beslutet finns på Mina sidor.
           maxLength: 65535
           minLength: 0
         sprak:
           type: string
           description: "ISO 639-1, standard sv"
           examples:
-          - sv
+            - sv
           maxLength: 10
           minLength: 0
           pattern: "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
@@ -463,14 +463,14 @@ components:
           type: string
           description: "RFC 3339, eller lokal tid ÅÅÅÅ-MM-DD HH:MM:SS i Europe/Stockholm"
           examples:
-          - 2026-09-20T10:00:00+02:00
+            - 2026-09-20T10:00:00+02:00
           maxLength: 40
           minLength: 0
         kundhandelseTyp:
           type: string
           description: PRODUCENTPREFIX.ARENDETYP.HANDELSETYP
           examples:
-          - REFKOM.BYGGLOV.BESLUT
+            - REFKOM.BYGGLOV.BESLUT
           maxLength: 200
           minLength: 0
           pattern: "^[A-Z]+(?:\\.[A-Z0-9_]+){2,}$"
@@ -482,7 +482,7 @@ components:
           type: string
           description: "Version av standarden, standard enligt konfigurationen"
           examples:
-          - "6.1"
+            - "6.1"
           maxLength: 10
           minLength: 0
           pattern: ^\d+(?:\.\d+)*$
@@ -496,7 +496,7 @@ components:
           type: array
           description: Taggar som frågor kan filtrera på
           examples:
-          - bygglov
+            - bygglov
           items:
             type: string
             maxLength: 100
@@ -504,14 +504,14 @@ components:
           maxItems: 100
           minItems: 0
       required:
-      - beskrivning
-      - kundhandelseId
-      - kundhandelseTyp
-      - part
-      - producentarendetKlart
-      - producentarendetKraverKundatgard
-      - rubrik
-      - tidpunkt
+        - beskrivning
+        - kundhandelseId
+        - kundhandelseTyp
+        - part
+        - producentarendetKlart
+        - producentarendetKraverKundatgard
+        - rubrik
+        - tidpunkt
     Part:
       type: object
       description: "En part identifieras som kund, ärende eller båda"
@@ -535,30 +535,11 @@ components:
             $ref: "#/components/schemas/Violation"
         title:
           type: string
-        instance:
-          type: string
-          format: uri
-        detail:
-          type: string
-        causeAsProblem:
-          $ref: "#/components/schemas/ThrowableProblem"
-    ThrowableProblem:
-      type: object
-      properties:
-        type:
-          type: string
-          format: uri
-        title:
-          type: string
-        status:
-          type: integer
-          format: int32
         detail:
           type: string
         instance:
           type: string
           format: uri
-        causeAsProblem: {}
     Violation:
       type: object
       properties:
@@ -574,7 +555,7 @@ components:
           type: integer
           format: int64
           examples:
-          - 5
+            - 5
       readOnly: true
     ErrorResponse:
       type: object
@@ -583,7 +564,7 @@ components:
         message:
           type: string
           examples:
-          - "Bad request: fraga.parter måste innehålla minst en part"
+            - "Bad request: fraga.parter måste innehålla minst en part"
     Behandling:
       type: object
       description: Styr sortering och paginering av kundhändelserna i svaret. Paginering
@@ -630,18 +611,18 @@ components:
           type: string
           description: Från och med datum (svensk tid)
           examples:
-          - 2026-08-01
+            - 2026-08-01
           pattern: "^\\d{4}-\\d{2}-\\d{2}$"
         slutDatum:
           type: string
           description: Till och med datum (svensk tid)
           examples:
-          - 2026-09-30
+            - 2026-09-30
           pattern: "^\\d{4}-\\d{2}-\\d{2}$"
         behandling:
           $ref: "#/components/schemas/Behandling"
       required:
-      - parter
+        - parter
     KundhandelseFragaRequest:
       type: object
       description: Fråga om kundhändelser
@@ -652,12 +633,12 @@ components:
           type: string
           description: Personnummer för användaren som begär uppgifterna
           examples:
-          - "194903012658"
+            - "194903012658"
           minLength: 1
           pattern: "^\\d{12}$"
       required:
-      - anvandare
-      - fraga
+        - anvandare
+        - fraga
     Paginering:
       type: object
       description: Paginering. Utan limit lämnas alla kundhändelser från offset till
@@ -667,17 +648,17 @@ components:
           type: integer
           format: int32
           examples:
-          - 0
+            - 0
           minimum: 0
         limit:
           type: integer
           format: int32
           examples:
-          - 20
+            - 20
           maximum: 1000
           minimum: 1
       required:
-      - offset
+        - offset
     Sortering:
       type: object
       description: Sortering på ett attribut
@@ -685,21 +666,21 @@ components:
         attribut:
           type: string
           enum:
-          - RUBRIK
-          - BESKRIVNING
-          - PRODUCENT
-          - TIDPUNKT
-          - KUNDHANDELSETYP
-          - PRODUCENTARENDETKRAVERKUNDATGARD
-          - PRODUCENTARENDETKLART
+            - RUBRIK
+            - BESKRIVNING
+            - PRODUCENT
+            - TIDPUNKT
+            - KUNDHANDELSETYP
+            - PRODUCENTARENDETKRAVERKUNDATGARD
+            - PRODUCENTARENDETKLART
           examples:
-          - TIDPUNKT
+            - TIDPUNKT
           pattern: ^(RUBRIK|BESKRIVNING|PRODUCENT|TIDPUNKT|KUNDHANDELSETYP|PRODUCENTARENDETKRAVERKUNDATGARD|PRODUCENTARENDETKLART)$
         stigande:
           type: boolean
       required:
-      - attribut
-      - stigande
+        - attribut
+        - stigande
     Delfraga:
       type: object
       description: Utfall per producent och part
@@ -711,14 +692,14 @@ components:
         status:
           type: string
           examples:
-          - OK
+            - OK
         message:
           type: string
         httpCode:
           type: integer
           format: int32
           examples:
-          - 200
+            - 200
     Kundhandelse:
       type: object
       description: En kundhändelse enligt Mina ärendens standard
@@ -726,7 +707,7 @@ components:
         kundhandelseId:
           type: string
           examples:
-          - REFKOM-BYGG-2026-00123-1
+            - REFKOM-BYGG-2026-00123-1
         rubrik:
           type: string
         beskrivning:
@@ -735,20 +716,20 @@ components:
           type: string
           description: ISO 639-1
           examples:
-          - sv
+            - sv
         producent:
           type: string
           examples:
-          - Referenskommunen
+            - Referenskommunen
         tidpunkt:
           type: string
           description: RFC 3339
           examples:
-          - 2026-09-01T10:15:00+02:00
+            - 2026-09-01T10:15:00+02:00
         kundhandelseTyp:
           type: string
           examples:
-          - REFKOM.BYGGLOV.ANSOKAN_MOTTAGEN
+            - REFKOM.BYGGLOV.ANSOKAN_MOTTAGEN
         producentarendetKraverKundatgard:
           type: boolean
         producentarendetKlart:
@@ -757,7 +738,7 @@ components:
           type: string
           description: Version av standarden som producenten implementerat
           examples:
-          - "6.1"
+            - "6.1"
         utokadInformation:
           type: object
           description: Utökad information (fritt JSON-objekt)

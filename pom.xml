@@ -4,14 +4,14 @@
 	<parent>
 		<groupId>se.sundsvall.dept44</groupId>
 		<artifactId>dept44-service-parent</artifactId>
-		<version>8.0.10</version>
+		<version>8.1.0</version>
 		<relativePath />
 		<!-- lookup parent from repository -->
 	</parent>
 	<groupId>se.sundsvall</groupId>
-	<artifactId>api-service-mina-arenden</artifactId>
+	<artifactId>api-service-activity-feed</artifactId>
 	<version>1.0</version>
-	<name>api-service-mina-arenden</name>
+	<name>api-service-activity-feed</name>
 	<description>Producent enligt Mina ärendens standard, med ärendecache i MariaDB</description>
 	<licenses>
 		<license>
@@ -64,16 +64,6 @@
 						<!-- JPA-metamodell genererad av hibernate-processor -->
 						<exclude>**/se/sundsvall/minaarenden/integration/db/model/*_**</exclude>
 					</excludes>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>se.sundsvall.dept44</groupId>
-				<artifactId>dept44-formatting-plugin</artifactId>
-				<configuration>
-					<!-- Redan körda Flyway-migreringar får aldrig ändras (checksumman i flyway_schema_history), inte ens av formateringen -->
-					<sqlExcludes>
-						<sqlExclude>src/main/resources/db/migration/V1__kundhandelse.sql</sqlExclude>
-					</sqlExcludes>
 				</configuration>
 			</plugin>
 		</plugins>

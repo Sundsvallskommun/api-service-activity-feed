@@ -13,6 +13,7 @@ import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.minaarenden.Application;
 import se.sundsvall.minaarenden.service.FragaService;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -28,7 +29,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @AutoConfigureWebTestClient
 @SpringBootTest(classes = Application.class, webEnvironment = RANDOM_PORT)
 @ActiveProfiles("junit")
-class KundhandelseFragaResourceFailuresTest {
+class KundhandelseFragaResourceFailureTest {
 
 	private static final String GILTIG_FRAGA = """
 		{"fraga":{"parter":[{"kund":{"identifierare":"199009090000","typ":"Personnummer"}}]},"anvandare":"199009090000"}
@@ -134,7 +135,7 @@ class KundhandelseFragaResourceFailuresTest {
 			.bodyValue(GILTIG_FRAGA)
 			.exchange()
 			.expectStatus().isBadRequest()
-			.expectBody().jsonPath("$.message").value(message -> org.assertj.core.api.Assertions.assertThat((String) message).startsWith("Bad request: "));
+			.expectBody().jsonPath("$.message").value(message -> assertThat((String) message).startsWith("Bad request: "));
 		verifyNoInteractions(fragaService);
 	}
 

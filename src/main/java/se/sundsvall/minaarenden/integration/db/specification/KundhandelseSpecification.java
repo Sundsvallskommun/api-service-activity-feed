@@ -72,7 +72,7 @@ public final class KundhandelseSpecification {
 			return unrestricted();
 		}
 		return (root, query, cb) -> {
-			final var subquery = query.subquery(Long.class);
+			final var subquery = query.subquery(String.class);
 			final var inner = subquery.from(KundhandelseEntity.class);
 			final var tagg = inner.join(KundhandelseEntity_.taggar);
 			subquery.select(inner.get(KundhandelseEntity_.id)).where(cb.equal(inner.get(KundhandelseEntity_.id), root.get(KundhandelseEntity_.id)), tagg.in(taggar));

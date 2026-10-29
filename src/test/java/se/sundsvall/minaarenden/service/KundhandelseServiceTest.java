@@ -1,7 +1,9 @@
 package se.sundsvall.minaarenden.service;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static se.sundsvall.minaarenden.integration.db.model.KundhandelseEntity.UNIK_KUNDHANDELSE_ID;
 import static se.sundsvall.minaarenden.service.TestdataFactory.MUNICIPALITY_ID;
 import static se.sundsvall.minaarenden.service.TestdataFactory.PRODUCENT;
 import static se.sundsvall.minaarenden.service.TestdataFactory.entity;
@@ -91,11 +94,36 @@ class KundhandelseServiceTest {
 		when(producentService.hamta(MUNICIPALITY_ID)).thenReturn(PRODUCENT);
 		when(producentService.standardVersion()).thenReturn("6.1");
 		when(repository.findByMunicipalityIdAndKundhandelseId(MUNICIPALITY_ID, "TESTKOP-1")).thenReturn(Optional.empty());
-		doThrow(new DataIntegrityViolationException("Duplicate entry")).when(repository).flush();
+		doThrow(databasfel(UNIK_KUNDHANDELSE_ID)).when(repository).flush();
 
 		assertThatExceptionOfType(ThrowableProblem.class)
 			.isThrownBy(() -> service.spara(MUNICIPALITY_ID, List.of(nyKundhandelse("TESTKOP-1"))))
 			.satisfies(problem -> assertThat(problem.getStatus()).isEqualTo(CONFLICT));
+	}
+
+	@Test
+	void annatDatabasfelLamnasVidare() {
+		final var fel = databasfel("PRIMARY");
+		when(producentService.hamta(MUNICIPALITY_ID)).thenReturn(PRODUCENT);
+		when(producentService.standardVersion()).thenReturn("6.1");
+		when(repository.findByMunicipalityIdAndKundhandelseId(MUNICIPALITY_ID, "TESTKOP-1")).thenReturn(Optional.empty());
+		doThrow(fel).when(repository).flush();
+
+		assertThatExceptionOfType(DataIntegrityViolationException.class)
+			.isThrownBy(() -> service.spara(MUNICIPALITY_ID, List.of(nyKundhandelse("TESTKOP-1"))))
+			.isSameAs(fel);
+	}
+
+	@Test
+	void arKundhandelseIdKrock() {
+		assertThat(KundhandelseService.arKundhandelseIdKrock(databasfel(UNIK_KUNDHANDELSE_ID))).isTrue();
+		assertThat(KundhandelseService.arKundhandelseIdKrock(databasfel("PRIMARY"))).isFalse();
+		assertThat(KundhandelseService.arKundhandelseIdKrock(databasfel(null))).isFalse();
+		assertThat(KundhandelseService.arKundhandelseIdKrock(new DataIntegrityViolationException("Data too long"))).isFalse();
+	}
+
+	private static DataIntegrityViolationException databasfel(final String constraintName) {
+		return new DataIntegrityViolationException("Duplicate entry", new ConstraintViolationException("Duplicate entry", new SQLException(), constraintName));
 	}
 
 	@Test

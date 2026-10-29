@@ -10,7 +10,7 @@ RUN mvn -B -q dependency:go-offline -Dmaven.gitcommitid.skip=true || true
 COPY src ./src
 # git-commit-id kräver .git (som inte skickas med i byggkontexten); formateringen kontrolleras i CI.
 RUN mvn -B -q package -DskipTests -Dmaven.gitcommitid.skip=true -Dspotless.check.skip=true \
- && cp target/api-service-mina-arenden-*.jar /build/app.jar
+ && cp target/api-service-activity-feed-*.jar /build/app.jar
 
 # Steg 2: körtidsbild (samma bas som dept44-tjänsterna i Sundsvalls kommun)
 FROM eclipse-temurin:25-jre

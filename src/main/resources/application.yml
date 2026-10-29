@@ -21,8 +21,6 @@ spring:
     clean-disabled: true
     validate-on-migrate: true
     out-of-order: false
-    placeholders:
-      default_municipality_id: ${MINA_ARENDEN_MUNICIPALITY_ID:2281}
   jpa:
     open-in-view: false
     properties:

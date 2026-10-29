@@ -50,7 +50,7 @@ public final class TestdataFactory {
 
 	public static KundhandelseEntity entity(final String kundhandelseId) {
 		return KundhandelseEntity.create()
-			.withId(1L)
+			.withId("5d8c3e0a-1b7f-4c2e-9a6d-3f1e2b4c5a6d")
 			.withMunicipalityId(MUNICIPALITY_ID)
 			.withKundhandelseId(kundhandelseId)
 			.withProducent(PRODUCENT.namn())

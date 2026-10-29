@@ -38,7 +38,7 @@ class KundhandelseEntityTest {
 	void builderMetoder() {
 		final var tidpunkt = Instant.parse("2026-09-20T08:00:00Z");
 		final var entity = KundhandelseEntity.create()
-			.withId(1L)
+			.withId("5d8c3e0a-1b7f-4c2e-9a6d-3f1e2b4c5a6d")
 			.withMunicipalityId("2281")
 			.withKundhandelseId("ID")
 			.withProducent("Producent")

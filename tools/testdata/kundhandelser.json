@@ -1,0 +1,1314 @@
+[
+  {
+    "kundhandelseId": "REFKOM-BYGG-2026-00456-1",
+    "part": {
+      "kund": {
+        "identifierare": "199001012385",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "BYGG-2026-00456",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan om bygglov mottagen",
+    "beskrivning": "Vi har tagit emot din ansökan om bygglov för tillbyggnad av enbostadshus.",
+    "tidpunkt": "2026-03-09T10:14:00+01:00",
+    "kundhandelseTyp": "REFKOM.BYGGLOV.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "bygglov"
+    ],
+    "referenser": {
+      "diarienummer": "BYGG-2026-00456"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-BYGG-2026-00456-2",
+    "part": {
+      "kund": {
+        "identifierare": "199001012385",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "BYGG-2026-00456",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan behöver kompletteras",
+    "beskrivning": "Situationsplan och fasadritning saknas. Komplettera senast 20 april, annars kan ansökan avvisas.",
+    "tidpunkt": "2026-03-23T14:02:00+01:00",
+    "kundhandelseTyp": "REFKOM.BYGGLOV.KOMPLETTERING_BEGARD",
+    "producentarendetKraverKundatgard": true,
+    "producentarendetKlart": false,
+    "taggar": [
+      "bygglov",
+      "kundatgard"
+    ],
+    "utokadInformation": {
+      "senastDatum": "2026-04-20",
+      "saknadeHandlingar": [
+        "Situationsplan",
+        "Fasadritning"
+      ]
+    },
+    "referenser": {
+      "diarienummer": "BYGG-2026-00456"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-BYGG-2026-00456-3",
+    "part": {
+      "kund": {
+        "identifierare": "199001012385",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "BYGG-2026-00456",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Komplettering mottagen",
+    "beskrivning": "Vi har tagit emot kompletteringen. Handläggningen fortsätter.",
+    "tidpunkt": "2026-04-08T08:47:00+02:00",
+    "kundhandelseTyp": "REFKOM.BYGGLOV.KOMPLETTERING_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "bygglov"
+    ],
+    "referenser": {
+      "diarienummer": "BYGG-2026-00456"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-BYGG-2026-00456-4",
+    "part": {
+      "kund": {
+        "identifierare": "199001012385",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "BYGG-2026-00456",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beslut om bygglov",
+    "beskrivning": "Bygglov har beviljats. Beslutet finns på Mina sidor och vinner laga kraft fyra veckor efter kungörelse.",
+    "tidpunkt": "2026-05-12T11:30:00+02:00",
+    "kundhandelseTyp": "REFKOM.BYGGLOV.BESLUT.BEVILJAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "bygglov",
+      "beslut"
+    ],
+    "utokadInformation": {
+      "beslutsdatum": "2026-05-12",
+      "overklagandeSenast": "2026-06-02"
+    },
+    "referenser": {
+      "diarienummer": "BYGG-2026-00456"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-BYGG-2026-00456-5",
+    "part": {
+      "kund": {
+        "identifierare": "199001022384",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "BYGG-2026-00456",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beslut om bygglov",
+    "beskrivning": "Bygglov har beviljats. Du får beslutet eftersom du är medsökande.",
+    "tidpunkt": "2026-05-12T11:30:00+02:00",
+    "kundhandelseTyp": "REFKOM.BYGGLOV.BESLUT.BEVILJAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "bygglov",
+      "beslut"
+    ],
+    "utokadInformation": {
+      "beslutsdatum": "2026-05-12",
+      "overklagandeSenast": "2026-06-02"
+    },
+    "referenser": {
+      "diarienummer": "BYGG-2026-00456"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-BYGG-2026-00456-6",
+    "part": {
+      "kund": {
+        "identifierare": "199001012385",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "BYGG-2026-00456",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Startbesked",
+    "beskrivning": "Startbesked har lämnats. Byggnationen får påbörjas.",
+    "tidpunkt": "2026-06-11 13:45:00",
+    "kundhandelseTyp": "REFKOM.BYGGLOV.STARTBESKED",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "bygglov"
+    ],
+    "referenser": {
+      "diarienummer": "BYGG-2026-00456"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-FSK-2026-01203-1",
+    "part": {
+      "kund": {
+        "identifierare": "199001012385",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "FSK-2026-01203",
+        "typ": "Producentarendereferens"
+      }
+    },
+    "rubrik": "Ansökan om förskoleplats mottagen",
+    "beskrivning": "Vi har tagit emot din ansökan om plats i förskola. Önskat startdatum är 17 augusti.",
+    "tidpunkt": "2026-02-16T19:21:00+01:00",
+    "kundhandelseTyp": "REFKOM.FORSKOLA.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "forskola"
+    ]
+  },
+  {
+    "kundhandelseId": "REFKOM-FSK-2026-01203-2",
+    "part": {
+      "kund": {
+        "identifierare": "199001012385",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "FSK-2026-01203",
+        "typ": "Producentarendereferens"
+      }
+    },
+    "rubrik": "Plats i förskola erbjuden",
+    "beskrivning": "Ditt barn har erbjudits plats på Solrosens förskola. Svara på erbjudandet senast 15 maj.",
+    "tidpunkt": "2026-04-29T09:05:00+02:00",
+    "kundhandelseTyp": "REFKOM.FORSKOLA.PLATS_ERBJUDEN",
+    "producentarendetKraverKundatgard": true,
+    "producentarendetKlart": false,
+    "taggar": [
+      "forskola",
+      "kundatgard"
+    ],
+    "utokadInformation": {
+      "forskola": "Solrosens förskola",
+      "startdatum": "2026-08-17",
+      "svaraSenast": "2026-05-15"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-FSK-2026-01203-3",
+    "part": {
+      "kund": {
+        "identifierare": "199001012385",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "FSK-2026-01203",
+        "typ": "Producentarendereferens"
+      }
+    },
+    "rubrik": "Plats accepterad",
+    "beskrivning": "Du har tackat ja till platsen. Förskolan kontaktar dig om inskolning.",
+    "tidpunkt": "2026-05-03T20:40:00+02:00",
+    "kundhandelseTyp": "REFKOM.FORSKOLA.PLATS_ACCEPTERAD",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "forskola"
+    ]
+  },
+  {
+    "kundhandelseId": "REFKOM-PT-2026-00078-1",
+    "part": {
+      "kund": {
+        "identifierare": "198401012391",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "PT-2026-00078",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan om parkeringstillstånd mottagen",
+    "beskrivning": "Vi har tagit emot din ansökan om parkeringstillstånd för rörelsehindrade.",
+    "tidpunkt": "2026-06-01T10:00:00+02:00",
+    "kundhandelseTyp": "REFKOM.PARKERINGSTILLSTAND.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "parkering"
+    ],
+    "referenser": {
+      "diarienummer": "PT-2026-00078"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-PT-2026-00078-2",
+    "part": {
+      "kund": {
+        "identifierare": "198401012391",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "PT-2026-00078",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beslut om parkeringstillstånd",
+    "beskrivning": "Ansökan har beviljats. Kortet skickas med post inom en vecka.",
+    "tidpunkt": "2026-06-24T15:12:00+02:00",
+    "kundhandelseTyp": "REFKOM.PARKERINGSTILLSTAND.BESLUT.BEVILJAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "parkering",
+      "beslut"
+    ],
+    "utokadInformation": {
+      "beslutsdatum": "2026-06-24",
+      "giltigtTill": "2029-06-30"
+    },
+    "referenser": {
+      "diarienummer": "PT-2026-00078"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-AVF-2026-03321-1",
+    "part": {
+      "kund": {
+        "identifierare": "198401012391",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "AVF-2026-03321",
+        "typ": "Kvittensnummer"
+      }
+    },
+    "rubrik": "Ändring av hämtintervall mottagen",
+    "beskrivning": "Vi har tagit emot din begäran om hämtning varannan vecka.",
+    "tidpunkt": "2026-08-18T07:55:00+02:00",
+    "kundhandelseTyp": "REFKOM.AVFALL.ANDRING_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "avfall"
+    ],
+    "referenser": {
+      "kvittensnummer": "AVF-2026-03321"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-AVF-2026-03321-2",
+    "part": {
+      "kund": {
+        "identifierare": "198401012391",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "AVF-2026-03321",
+        "typ": "Kvittensnummer"
+      }
+    },
+    "rubrik": "Ändring genomförd",
+    "beskrivning": "Hämtning sker nu varannan vecka från och med vecka 36.",
+    "tidpunkt": "2026-08-25T13:10:00+02:00",
+    "kundhandelseTyp": "REFKOM.AVFALL.ANDRING_GENOMFORD",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "avfall"
+    ],
+    "referenser": {
+      "kvittensnummer": "AVF-2026-03321"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-FT-2026-00412-1",
+    "part": {
+      "kund": {
+        "identifierare": "194801141864",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "FT-2026-00412",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan om färdtjänst mottagen",
+    "beskrivning": "Vi har tagit emot din ansökan om färdtjänst. En handläggare kontaktar dig.",
+    "tidpunkt": "2026-04-14T11:22:00+02:00",
+    "kundhandelseTyp": "REFKOM.FARDTJANST.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "fardtjanst"
+    ],
+    "referenser": {
+      "diarienummer": "FT-2026-00412"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-FT-2026-00412-2",
+    "part": {
+      "kund": {
+        "identifierare": "194801141864",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "FT-2026-00412",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Hembesök bokat",
+    "beskrivning": "En handläggare besöker dig 28 april klockan 10. Hör av dig om tiden inte passar.",
+    "tidpunkt": "2026-04-20T09:30:00+02:00",
+    "kundhandelseTyp": "REFKOM.FARDTJANST.HEMBESOK_BOKAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "fardtjanst"
+    ],
+    "utokadInformation": {
+      "tid": "2026-04-28T10:00:00+02:00"
+    },
+    "referenser": {
+      "diarienummer": "FT-2026-00412"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-FT-2026-00412-3",
+    "part": {
+      "kund": {
+        "identifierare": "194801141864",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "FT-2026-00412",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beslut om färdtjänst",
+    "beskrivning": "Färdtjänst har beviljats till och med 31 december 2028.",
+    "tidpunkt": "2026-05-06T14:05:00+02:00",
+    "kundhandelseTyp": "REFKOM.FARDTJANST.BESLUT.BEVILJAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "fardtjanst",
+      "beslut"
+    ],
+    "utokadInformation": {
+      "beslutsdatum": "2026-05-06",
+      "giltigtTill": "2028-12-31"
+    },
+    "referenser": {
+      "diarienummer": "FT-2026-00412"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-TL-2026-00230-1",
+    "part": {
+      "kund": {
+        "identifierare": "194801141864",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "TL-2026-00230",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan om trygghetslarm mottagen",
+    "beskrivning": "Vi har tagit emot din ansökan om trygghetslarm.",
+    "tidpunkt": "2026-09-07T10:40:00+02:00",
+    "kundhandelseTyp": "REFKOM.TRYGGHETSLARM.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "trygghetslarm"
+    ],
+    "referenser": {
+      "diarienummer": "TL-2026-00230"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-TL-2026-00230-2",
+    "part": {
+      "kund": {
+        "identifierare": "194801141864",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "TL-2026-00230",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Trygghetslarm installerat",
+    "beskrivning": "Larmet är installerat och testat.",
+    "tidpunkt": "2026-09-21T13:15:00+02:00",
+    "kundhandelseTyp": "REFKOM.TRYGGHETSLARM.INSTALLERAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "trygghetslarm"
+    ],
+    "referenser": {
+      "diarienummer": "TL-2026-00230"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-BAB-2026-00093-1",
+    "part": {
+      "kund": {
+        "identifierare": "197901012380",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "BAB-2026-00093",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan om bostadsanpassningsbidrag mottagen",
+    "beskrivning": "Vi har tagit emot din ansökan om bidrag för att ta bort trösklar.",
+    "tidpunkt": "2026-05-18T16:03:00+02:00",
+    "kundhandelseTyp": "REFKOM.BOSTADSANPASSNING.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "bostadsanpassning"
+    ],
+    "referenser": {
+      "diarienummer": "BAB-2026-00093"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-BAB-2026-00093-2",
+    "part": {
+      "kund": {
+        "identifierare": "197901012380",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "BAB-2026-00093",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Intyg saknas",
+    "beskrivning": "Ansökan saknar intyg från arbetsterapeut. Skicka in intyget senast 15 juni.",
+    "tidpunkt": "2026-05-27T10:18:00+02:00",
+    "kundhandelseTyp": "REFKOM.BOSTADSANPASSNING.KOMPLETTERING_BEGARD",
+    "producentarendetKraverKundatgard": true,
+    "producentarendetKlart": false,
+    "taggar": [
+      "bostadsanpassning",
+      "kundatgard"
+    ],
+    "utokadInformation": {
+      "senastDatum": "2026-06-15",
+      "saknadeHandlingar": [
+        "Intyg från arbetsterapeut"
+      ]
+    },
+    "referenser": {
+      "diarienummer": "BAB-2026-00093"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-BAB-2026-00093-3",
+    "part": {
+      "kund": {
+        "identifierare": "197901012380",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "BAB-2026-00093",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beslut om bostadsanpassningsbidrag",
+    "beskrivning": "Ansökan har avslagits eftersom intyget inte kom in i tid. Du kan överklaga beslutet.",
+    "tidpunkt": "2026-06-22T09:00:00+02:00",
+    "kundhandelseTyp": "REFKOM.BOSTADSANPASSNING.BESLUT.AVSLAG",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "bostadsanpassning",
+      "beslut"
+    ],
+    "utokadInformation": {
+      "beslutsdatum": "2026-06-22",
+      "overklagandeSenast": "2026-07-13"
+    },
+    "referenser": {
+      "diarienummer": "BAB-2026-00093"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-KART-2026-00211-1",
+    "part": {
+      "kund": {
+        "identifierare": "197901012380",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "KART-2026-00211",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beställning av nybyggnadskarta mottagen",
+    "beskrivning": "Vi har tagit emot din beställning av nybyggnadskarta.",
+    "tidpunkt": "2026-09-02T08:20:00+02:00",
+    "kundhandelseTyp": "REFKOM.KARTA.BESTALLNING_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "karta"
+    ],
+    "referenser": {
+      "diarienummer": "KART-2026-00211"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-KART-2026-00211-2",
+    "part": {
+      "kund": {
+        "identifierare": "197901012380",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "KART-2026-00211",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Nybyggnadskarta levererad",
+    "beskrivning": "Kartan finns att hämta på Mina sidor.",
+    "tidpunkt": "2026-09-16T15:45:00+02:00",
+    "kundhandelseTyp": "REFKOM.KARTA.LEVERERAD",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "karta"
+    ],
+    "referenser": {
+      "diarienummer": "KART-2026-00211"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-FEL-48213-1",
+    "part": {
+      "kund": {
+        "identifierare": "199601012397",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "FEL-48213",
+        "typ": "Kvittensnummer"
+      }
+    },
+    "rubrik": "Felanmälan mottagen",
+    "beskrivning": "Tack för din felanmälan om trasig gatubelysning på Storgatan.",
+    "tidpunkt": "2026-10-06T21:14:00+02:00",
+    "kundhandelseTyp": "REFKOM.FELANMALAN.MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "felanmalan"
+    ],
+    "referenser": {
+      "kvittensnummer": "FEL-48213"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-FEL-48213-2",
+    "part": {
+      "kund": {
+        "identifierare": "199601012397",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "FEL-48213",
+        "typ": "Kvittensnummer"
+      }
+    },
+    "rubrik": "Felet är åtgärdat",
+    "beskrivning": "Belysningen är lagad.",
+    "tidpunkt": "2026-10-09T11:02:00+02:00",
+    "kundhandelseTyp": "REFKOM.FELANMALAN.ATGARDAD",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "felanmalan"
+    ],
+    "referenser": {
+      "kvittensnummer": "FEL-48213"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-SKOL-2026-00517-1",
+    "part": {
+      "kund": {
+        "identifierare": "196201082697",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "SKOL-2026-00517",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan om skolskjuts mottagen",
+    "beskrivning": "Vi har tagit emot din ansökan om skolskjuts inför höstterminen.",
+    "tidpunkt": "2026-06-08T12:00:00+02:00",
+    "kundhandelseTyp": "REFKOM.SKOLSKJUTS.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "skolskjuts"
+    ],
+    "referenser": {
+      "diarienummer": "SKOL-2026-00517"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-SKOL-2026-00517-2",
+    "part": {
+      "kund": {
+        "identifierare": "196201082697",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "SKOL-2026-00517",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beslut om skolskjuts",
+    "beskrivning": "Skolskjuts har beviljats. Turlistan skickas ut i augusti.",
+    "tidpunkt": "2026-07-01T10:30:00+02:00",
+    "kundhandelseTyp": "REFKOM.SKOLSKJUTS.BESLUT.BEVILJAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "skolskjuts",
+      "beslut"
+    ],
+    "referenser": {
+      "diarienummer": "SKOL-2026-00517"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-ANM-2026-00144-1",
+    "part": {
+      "kund": {
+        "identifierare": "196201082697",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "ANM-2026-00144",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Anmälan om eldstad mottagen",
+    "beskrivning": "Vi har tagit emot din anmälan om installation av eldstad.",
+    "tidpunkt": "2026-09-28T17:35:00+02:00",
+    "kundhandelseTyp": "REFKOM.BYGGLOV.ANMALAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "bygglov",
+      "anmalan"
+    ],
+    "referenser": {
+      "diarienummer": "ANM-2026-00144"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-ANM-2026-00144-2",
+    "part": {
+      "kund": {
+        "identifierare": "196201082697",
+        "typ": "Personnummer"
+      },
+      "arende": {
+        "identifierare": "ANM-2026-00144",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Startbesked för eldstad",
+    "beskrivning": "Startbesked har lämnats. Kontakta en certifierad sakkunnig för kontroll efter installationen.",
+    "tidpunkt": "2026-10-13T10:10:00+02:00",
+    "kundhandelseTyp": "REFKOM.BYGGLOV.STARTBESKED",
+    "producentarendetKraverKundatgard": true,
+    "producentarendetKlart": false,
+    "taggar": [
+      "bygglov",
+      "anmalan",
+      "kundatgard"
+    ],
+    "referenser": {
+      "diarienummer": "ANM-2026-00144"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-TOB-2026-00012-1",
+    "part": {
+      "kund": {
+        "identifierare": "197101019045",
+        "typ": "Personnummer",
+        "tillagg": "001"
+      },
+      "arende": {
+        "identifierare": "TOB-2026-00012",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan om försäljningstillstånd för tobak mottagen",
+    "beskrivning": "Vi har tagit emot ansökan för din butik.",
+    "tidpunkt": "2026-03-02T09:45:00+01:00",
+    "kundhandelseTyp": "REFKOM.TOBAK.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "tobak"
+    ],
+    "referenser": {
+      "diarienummer": "TOB-2026-00012"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-TOB-2026-00012-2",
+    "part": {
+      "kund": {
+        "identifierare": "197101019045",
+        "typ": "Personnummer",
+        "tillagg": "001"
+      },
+      "arende": {
+        "identifierare": "TOB-2026-00012",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Tillsynsbesök genomfört",
+    "beskrivning": "Tillsynsbesöket är genomfört. Inga brister noterades.",
+    "tidpunkt": "2026-03-26T14:20:00+01:00",
+    "kundhandelseTyp": "REFKOM.TOBAK.TILLSYN_GENOMFORD",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "tobak"
+    ],
+    "referenser": {
+      "diarienummer": "TOB-2026-00012"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-TOB-2026-00012-3",
+    "part": {
+      "kund": {
+        "identifierare": "197101019045",
+        "typ": "Personnummer",
+        "tillagg": "001"
+      },
+      "arende": {
+        "identifierare": "TOB-2026-00012",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beslut om försäljningstillstånd",
+    "beskrivning": "Försäljningstillstånd för tobak har beviljats.",
+    "tidpunkt": "2026-04-09T10:00:00+02:00",
+    "kundhandelseTyp": "REFKOM.TOBAK.BESLUT.BEVILJAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "foretag",
+      "tobak",
+      "beslut"
+    ],
+    "referenser": {
+      "diarienummer": "TOB-2026-00012"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-SERV-2026-00088-1",
+    "part": {
+      "kund": {
+        "identifierare": "165566771234",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "SERV-2026-00088",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan om serveringstillstånd mottagen",
+    "beskrivning": "Vi har tagit emot ansökan om stadigvarande serveringstillstånd.",
+    "tidpunkt": "2026-04-02T13:00:00+02:00",
+    "kundhandelseTyp": "REFKOM.SERVERINGSTILLSTAND.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "serveringstillstand"
+    ],
+    "referenser": {
+      "diarienummer": "SERV-2026-00088"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-SERV-2026-00088-2",
+    "part": {
+      "kund": {
+        "identifierare": "165566771234",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "SERV-2026-00088",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Remiss skickad till polisen",
+    "beskrivning": "Ansökan har skickats på remiss till Polismyndigheten.",
+    "tidpunkt": "2026-04-15T10:25:00+02:00",
+    "kundhandelseTyp": "REFKOM.SERVERINGSTILLSTAND.REMISS_SKICKAD",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "serveringstillstand"
+    ],
+    "referenser": {
+      "diarienummer": "SERV-2026-00088"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-SERV-2026-00088-3",
+    "part": {
+      "kund": {
+        "identifierare": "165566771234",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "SERV-2026-00088",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Kunskapsprov bokat",
+    "beskrivning": "Kunskapsprov i alkohollagen är bokat 2 juli klockan 9 i stadshuset. Ta med legitimation.",
+    "tidpunkt": "2026-06-10T08:50:00+02:00",
+    "kundhandelseTyp": "REFKOM.SERVERINGSTILLSTAND.KUNSKAPSPROV_BOKAT",
+    "producentarendetKraverKundatgard": true,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "serveringstillstand",
+      "kundatgard"
+    ],
+    "utokadInformation": {
+      "tid": "2026-07-02T09:00:00+02:00",
+      "plats": "Stadshuset"
+    },
+    "referenser": {
+      "diarienummer": "SERV-2026-00088"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-SERV-2026-00088-4",
+    "part": {
+      "kund": {
+        "identifierare": "165566771234",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "SERV-2026-00088",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beslut om serveringstillstånd",
+    "beskrivning": "Stadigvarande serveringstillstånd har beviljats.",
+    "tidpunkt": "2026-07-20T11:15:00+02:00",
+    "kundhandelseTyp": "REFKOM.SERVERINGSTILLSTAND.BESLUT.BEVILJAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "foretag",
+      "serveringstillstand",
+      "beslut"
+    ],
+    "utokadInformation": {
+      "beslutsdatum": "2026-07-20"
+    },
+    "referenser": {
+      "diarienummer": "SERV-2026-00088"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-SERV-2026-00131-1",
+    "part": {
+      "kund": {
+        "identifierare": "165566771234",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "SERV-2026-00131",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan om tillfälligt serveringstillstånd mottagen",
+    "beskrivning": "Vi har tagit emot ansökan för evenemanget den 12 september.",
+    "tidpunkt": "2026-08-04T15:30:00+02:00",
+    "kundhandelseTyp": "REFKOM.SERVERINGSTILLSTAND.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "serveringstillstand"
+    ],
+    "referenser": {
+      "diarienummer": "SERV-2026-00131"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-SERV-2026-00131-2",
+    "part": {
+      "kund": {
+        "identifierare": "165566771234",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "SERV-2026-00131",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beslut om tillfälligt serveringstillstånd",
+    "beskrivning": "Tillfälligt serveringstillstånd har beviljats för 12 september.",
+    "tidpunkt": "2026-08-27T09:40:00+02:00",
+    "kundhandelseTyp": "REFKOM.SERVERINGSTILLSTAND.BESLUT.BEVILJAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "foretag",
+      "serveringstillstand",
+      "beslut"
+    ],
+    "referenser": {
+      "diarienummer": "SERV-2026-00131"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-LIV-2026-00230-1",
+    "part": {
+      "kund": {
+        "identifierare": "165566771234",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "LIV-2026-00230",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Registrering av livsmedelsanläggning mottagen",
+    "beskrivning": "Vi har tagit emot registreringen av er restaurang.",
+    "tidpunkt": "2026-05-04T10:05:00+02:00",
+    "kundhandelseTyp": "REFKOM.LIVSMEDEL.REGISTRERING_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "livsmedel"
+    ],
+    "referenser": {
+      "diarienummer": "LIV-2026-00230"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-LIV-2026-00230-2",
+    "part": {
+      "kund": {
+        "identifierare": "165566771234",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "LIV-2026-00230",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Kontroll bokad",
+    "beskrivning": "Livsmedelskontroll genomförs 3 juni. Kontrollen kan vara oanmäld vid senare tillfällen.",
+    "tidpunkt": "2026-05-20T13:30:00+02:00",
+    "kundhandelseTyp": "REFKOM.LIVSMEDEL.KONTROLL_BOKAD",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "livsmedel"
+    ],
+    "utokadInformation": {
+      "tid": "2026-06-03T10:00:00+02:00"
+    },
+    "referenser": {
+      "diarienummer": "LIV-2026-00230"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-LIV-2026-00230-3",
+    "part": {
+      "kund": {
+        "identifierare": "165566771234",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "LIV-2026-00230",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Kontrollrapport",
+    "beskrivning": "Kontrollen är genomförd. Rapporten och fakturan för kontrollavgiften finns på Mina sidor.",
+    "tidpunkt": "2026-06-05T14:50:00+02:00",
+    "kundhandelseTyp": "REFKOM.LIVSMEDEL.KONTROLLRAPPORT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "foretag",
+      "livsmedel"
+    ],
+    "utokadInformation": {
+      "avgift": 2950,
+      "valuta": "SEK"
+    },
+    "referenser": {
+      "diarienummer": "LIV-2026-00230"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-MILJO-2026-00057-1",
+    "part": {
+      "kund": {
+        "identifierare": "167696123450",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "MILJO-2026-00057",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Anmälan om miljöfarlig verksamhet mottagen",
+    "beskrivning": "Vi har tagit emot anmälan om verkstadsverksamhet.",
+    "tidpunkt": "2026-03-17T09:10:00+01:00",
+    "kundhandelseTyp": "REFKOM.MILJO.ANMALAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "miljo"
+    ],
+    "referenser": {
+      "diarienummer": "MILJO-2026-00057"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-MILJO-2026-00057-2",
+    "part": {
+      "kund": {
+        "identifierare": "167696123450",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "MILJO-2026-00057",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Tillsynsbesök genomfört",
+    "beskrivning": "Tillsynsbesöket är genomfört. Protokollet finns på Mina sidor.",
+    "tidpunkt": "2026-05-26T13:00:00+02:00",
+    "kundhandelseTyp": "REFKOM.MILJO.TILLSYN_GENOMFORD",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "miljo"
+    ],
+    "referenser": {
+      "diarienummer": "MILJO-2026-00057"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-MILJO-2026-00057-3",
+    "part": {
+      "kund": {
+        "identifierare": "167696123450",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "MILJO-2026-00057",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Föreläggande om åtgärd",
+    "beskrivning": "Oljeavskiljaren ska tömmas och ett tömningsintyg skickas in senast 30 september.",
+    "tidpunkt": "2026-06-16T10:45:00+02:00",
+    "kundhandelseTyp": "REFKOM.MILJO.FORELAGGANDE",
+    "producentarendetKraverKundatgard": true,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "miljo",
+      "kundatgard"
+    ],
+    "utokadInformation": {
+      "senastDatum": "2026-09-30",
+      "saknadeHandlingar": [
+        "Tömningsintyg"
+      ]
+    },
+    "referenser": {
+      "diarienummer": "MILJO-2026-00057"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-MILJO-2026-00057-4",
+    "part": {
+      "kund": {
+        "identifierare": "167696123450",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "MILJO-2026-00057",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Åtgärd godkänd",
+    "beskrivning": "Tömningsintyget är godkänt och ärendet är avslutat.",
+    "tidpunkt": "2026-09-24T08:30:00+02:00",
+    "kundhandelseTyp": "REFKOM.MILJO.ATGARD_GODKAND",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "foretag",
+      "miljo"
+    ],
+    "referenser": {
+      "diarienummer": "MILJO-2026-00057"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-BYGG-2026-00512-1",
+    "part": {
+      "kund": {
+        "identifierare": "167696123450",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "BYGG-2026-00512",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Ansökan om bygglov för skylt mottagen",
+    "beskrivning": "Vi har tagit emot ansökan om bygglov för fasadskylt.",
+    "tidpunkt": "2026-07-06T11:00:00+02:00",
+    "kundhandelseTyp": "REFKOM.BYGGLOV.ANSOKAN_MOTTAGEN",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "foretag",
+      "bygglov"
+    ],
+    "referenser": {
+      "diarienummer": "BYGG-2026-00512"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-BYGG-2026-00512-2",
+    "part": {
+      "kund": {
+        "identifierare": "167696123450",
+        "typ": "Organisationsnummer"
+      },
+      "arende": {
+        "identifierare": "BYGG-2026-00512",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Beslut om bygglov för skylt",
+    "beskrivning": "Bygglov för skylt har beviljats.",
+    "tidpunkt": "2026-08-12T14:20:00+02:00",
+    "kundhandelseTyp": "REFKOM.BYGGLOV.BESLUT.BEVILJAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "foretag",
+      "bygglov",
+      "beslut"
+    ],
+    "utokadInformation": {
+      "beslutsdatum": "2026-08-12",
+      "overklagandeSenast": "2026-09-02"
+    },
+    "referenser": {
+      "diarienummer": "BYGG-2026-00512"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-KS-2026-00009-1",
+    "part": {
+      "arende": {
+        "identifierare": "KS-2026-00009",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Medborgarförslag mottaget",
+    "beskrivning": "Medborgarförslaget om fler cykelställ vid resecentrum har registrerats.",
+    "tidpunkt": "2026-02-03T10:00:00+01:00",
+    "kundhandelseTyp": "REFKOM.MEDBORGARFORSLAG.MOTTAGET",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": false,
+    "taggar": [
+      "medborgarforslag"
+    ],
+    "referenser": {
+      "diarienummer": "KS-2026-00009"
+    }
+  },
+  {
+    "kundhandelseId": "REFKOM-KS-2026-00009-2",
+    "part": {
+      "arende": {
+        "identifierare": "KS-2026-00009",
+        "typ": "Diarienummer"
+      }
+    },
+    "rubrik": "Medborgarförslag besvarat",
+    "beskrivning": "Kommunfullmäktige har besvarat medborgarförslaget. Svaret finns i protokollet.",
+    "tidpunkt": "2026-10-20T19:30:00+02:00",
+    "kundhandelseTyp": "REFKOM.MEDBORGARFORSLAG.BESVARAT",
+    "producentarendetKraverKundatgard": false,
+    "producentarendetKlart": true,
+    "taggar": [
+      "medborgarforslag"
+    ],
+    "referenser": {
+      "diarienummer": "KS-2026-00009"
+    }
+  }
+]

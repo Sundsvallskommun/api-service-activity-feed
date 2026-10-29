@@ -3,6 +3,7 @@ package se.sundsvall.minaarenden.integration.db;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -19,6 +20,7 @@ import se.sundsvall.minaarenden.integration.db.model.KundhandelseEntity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace.NONE;
+import static se.sundsvall.minaarenden.integration.db.model.KundhandelseEntity.UNIK_KUNDHANDELSE_ID;
 import static se.sundsvall.minaarenden.integration.db.specification.KundhandelseSpecification.forPart;
 import static se.sundsvall.minaarenden.integration.db.specification.KundhandelseSpecification.sorteradEfter;
 import static se.sundsvall.minaarenden.integration.db.specification.KundhandelseSpecification.withKundhandelseTyper;
@@ -43,6 +45,7 @@ class KundhandelseRepositoryTest {
 
 	private static final String MUNICIPALITY_ID = "2281";
 	private static final Kund KUND = Kund.create().withIdentifierare("199009090000").withTyp("Personnummer");
+	private static final Kund ANNAN_KUND = Kund.create().withIdentifierare("199001012385").withTyp("Personnummer");
 
 	@Autowired
 	private KundhandelseRepository repository;
@@ -114,7 +117,50 @@ class KundhandelseRepositoryTest {
 			.withTidpunkt(Instant.now())
 			.withKundhandelseTyp("TESTKOP.TEST.SKAPAD")
 			.withVersion("6.1");
-		assertThatExceptionOfType(DataIntegrityViolationException.class).isThrownBy(() -> repository.saveAndFlush(dubblett));
+		// KundhandelseService känner igen krocken på villkorets namn och svarar då 409.
+		assertThatExceptionOfType(DataIntegrityViolationException.class).isThrownBy(() -> repository.saveAndFlush(dubblett))
+			.havingCause()
+			.isInstanceOfSatisfying(ConstraintViolationException.class, fel -> assertThat(fel.getConstraintName()).isEqualToIgnoringCase(UNIK_KUNDHANDELSE_ID));
+	}
+
+	@Test
+	void kundhandelseIdJamforsExakt() {
+		repository.saveAndFlush(ny("testkop-bygg-1").withRubrik("Gemener"));
+
+		assertThat(repository.findByMunicipalityIdAndKundhandelseId(MUNICIPALITY_ID, "testkop-bygg-1")).hasValueSatisfying(entity -> assertThat(entity.getRubrik()).isEqualTo("Gemener"));
+		assertThat(repository.findByMunicipalityIdAndKundhandelseId(MUNICIPALITY_ID, "TESTKOP-BYGG-1")).hasValueSatisfying(entity -> assertThat(entity.getRubrik()).isNotEqualTo("Gemener"));
+	}
+
+	@Test
+	void taggarJamforsExakt() {
+		repository.saveAndFlush(ny("TESTKOP-TAGG-1").withTaggar(Set.of("bygglov", "Bygglov")));
+
+		final var traffar = repository.findAll(Specification.allOf(withMunicipalityId(MUNICIPALITY_ID), withNagonAvTaggarna(List.of("Bygglov"))));
+
+		assertThat(traffar).extracting(KundhandelseEntity::getKundhandelseId).containsExactly("TESTKOP-TAGG-1");
+	}
+
+	@Test
+	void langBeskrivningMedSvenskaTeckenSparas() {
+		// 65 535 tecken som API:t tillåter, men 131 070 byte i UTF-8.
+		final var beskrivning = "å".repeat(65_535);
+
+		repository.saveAndFlush(ny("TESTKOP-LANG-1").withBeskrivning(beskrivning));
+
+		final var traffar = repository.findAll(Specification.allOf(withMunicipalityId(MUNICIPALITY_ID), forPart(ANNAN_KUND, null)));
+		assertThat(traffar).extracting(KundhandelseEntity::getBeskrivning).containsExactly(beskrivning);
+	}
+
+	@Test
+	void rubrikSorterasEnligtSvenskaRegler() {
+		repository.saveAll(List.of(ny("TESTKOP-SORT-1").withRubrik("Ärende"), ny("TESTKOP-SORT-2").withRubrik("Zebra"), ny("TESTKOP-SORT-3").withRubrik("Apa"),
+			ny("TESTKOP-SORT-4").withRubrik("Åtgärd")));
+		repository.flush();
+
+		final var traffar = repository.findAll(Specification.allOf(withMunicipalityId(MUNICIPALITY_ID), forPart(ANNAN_KUND, null),
+			sorteradEfter(List.of(Sortering.create().withAttribut("RUBRIK").withStigande(true)))));
+
+		assertThat(traffar).extracting(KundhandelseEntity::getRubrik).containsExactly("Apa", "Zebra", "Åtgärd", "Ärende");
 	}
 
 	@Test
@@ -191,5 +237,23 @@ class KundhandelseRepositoryTest {
 		return repository.findAll(Specification.allOf(withMunicipalityId(MUNICIPALITY_ID), forPart(KUND, null), specification)).stream()
 			.map(KundhandelseEntity::getKundhandelseId)
 			.toList();
+	}
+
+	/**
+	 * En kundhändelse för en kund som inte finns i testdatat.
+	 */
+	private static KundhandelseEntity ny(final String kundhandelseId) {
+		return KundhandelseEntity.create()
+			.withMunicipalityId(MUNICIPALITY_ID)
+			.withKundhandelseId(kundhandelseId)
+			.withProducent("Testköpings kommun")
+			.withKundIdentifierare(ANNAN_KUND.getIdentifierare())
+			.withKundTyp(ANNAN_KUND.getTyp())
+			.withRubrik("r")
+			.withBeskrivning("b")
+			.withSprak("sv")
+			.withTidpunkt(Instant.parse("2026-09-20T08:00:00Z"))
+			.withKundhandelseTyp("TESTKOP.TEST.SKAPAD")
+			.withVersion("6.1");
 	}
 }

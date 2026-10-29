@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    url: jdbc:tc:mariadb:11.4:///minaarenden
+    url: jdbc:tc:mariadb:10.6.14:///minaarenden
   jpa:
     properties:
       hibernate:

@@ -4,7 +4,6 @@
         producentarendet_klart bit not null,
         producentarendet_kraver_kundatgard bit not null,
         andrad datetime(6),
-        id bigint not null auto_increment,
         skapad datetime(6) not null,
         tidpunkt datetime(6) not null,
         sprak varchar(10) not null,
@@ -17,17 +16,18 @@
         kundhandelse_id varchar(100) not null,
         kundhandelse_typ varchar(200) not null,
         producent varchar(200) not null,
+        id varchar(255) not null,
         rubrik varchar(255) not null,
-        beskrivning text not null,
-        referenser text,
-        utokad_information text,
+        beskrivning longtext not null,
+        referenser longtext,
+        utokad_information longtext,
         primary key (id)
     ) engine=InnoDB;
 
     create table kundhandelse_tagg (
-        kundhandelse_ref bigint not null,
         tagg varchar(100) not null,
-        primary key (kundhandelse_ref, tagg)
+        kundhandelse_ref varchar(255) not null,
+        primary key (tagg, kundhandelse_ref)
     ) engine=InnoDB;
 
     create index ix_kundhandelse_kund 
