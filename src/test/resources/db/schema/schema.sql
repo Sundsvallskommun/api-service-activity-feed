@@ -18,9 +18,9 @@
         producent varchar(200) not null,
         id varchar(255) not null,
         rubrik varchar(255) not null,
-        beskrivning text not null,
-        referenser text,
-        utokad_information text,
+        beskrivning longtext not null,
+        referenser longtext,
+        utokad_information longtext,
         primary key (id)
     ) engine=InnoDB;
 

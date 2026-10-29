@@ -23,7 +23,7 @@ import java.util.Set;
 import org.hibernate.annotations.UuidGenerator;
 import se.sundsvall.dept44.util.PiiMasker;
 
-import static org.hibernate.Length.LONG16;
+import static org.hibernate.Length.LONG32;
 
 /**
  * En kundhändelse i ärendecachen. Fälten motsvarar objektet kundhandelse i API-specifikationen, kompletterat med
@@ -31,7 +31,7 @@ import static org.hibernate.Length.LONG16;
  */
 @Entity
 @Table(name = "kundhandelse",
-	uniqueConstraints = @UniqueConstraint(name = "uq_kundhandelse_municipality_id_kundhandelse_id", columnNames = {
+	uniqueConstraints = @UniqueConstraint(name = KundhandelseEntity.UNIK_KUNDHANDELSE_ID, columnNames = {
 		"municipality_id", "kundhandelse_id"
 	}),
 	indexes = {
@@ -41,6 +41,9 @@ import static org.hibernate.Length.LONG16;
 		@Index(name = "ix_kundhandelse_typ", columnList = "kundhandelse_typ")
 	})
 public class KundhandelseEntity implements Serializable {
+
+	/** Det unika villkoret för kundhandelseId inom kommunen. */
+	public static final String UNIK_KUNDHANDELSE_ID = "uq_kundhandelse_municipality_id_kundhandelse_id";
 
 	@Serial
 	private static final long serialVersionUID = 4034813525227427812L;
@@ -77,7 +80,7 @@ public class KundhandelseEntity implements Serializable {
 	@Column(name = "rubrik", nullable = false)
 	private String rubrik;
 
-	@Column(name = "beskrivning", nullable = false, length = LONG16)
+	@Column(name = "beskrivning", nullable = false, length = LONG32)
 	private String beskrivning;
 
 	@Column(name = "sprak", nullable = false, length = 10)
@@ -98,10 +101,10 @@ public class KundhandelseEntity implements Serializable {
 	@Column(name = "version", nullable = false, length = 10)
 	private String version;
 
-	@Column(name = "utokad_information", length = LONG16)
+	@Column(name = "utokad_information", length = LONG32)
 	private String utokadInformation;
 
-	@Column(name = "referenser", length = LONG16)
+	@Column(name = "referenser", length = LONG32)
 	private String referenser;
 
 	@Column(name = "skapad", nullable = false)
