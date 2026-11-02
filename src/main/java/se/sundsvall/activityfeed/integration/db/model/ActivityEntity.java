@@ -414,8 +414,16 @@ public class ActivityEntity {
 		return tags;
 	}
 
+	/**
+	 * Changes the existing set instead of replacing it. Hibernate treats a new set as a new collection and rewrites
+	 * every tag, which also updates the activity.
+	 */
 	public void setTags(final Set<String> tags) {
-		this.tags = Optional.ofNullable(tags).map(LinkedHashSet::new).orElseGet(LinkedHashSet::new);
+		final Set<String> newTags = Optional.ofNullable(tags).orElse(Set.of());
+		if (!this.tags.equals(newTags)) {
+			this.tags.clear();
+			this.tags.addAll(newTags);
+		}
 	}
 
 	public ActivityEntity withTags(final Set<String> tags) {

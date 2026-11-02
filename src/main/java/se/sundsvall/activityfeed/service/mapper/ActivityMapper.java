@@ -1,5 +1,6 @@
 package se.sundsvall.activityfeed.service.mapper;
 
+import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -90,7 +91,7 @@ public final class ActivityMapper {
 			.withTitle(activity.getRubrik())
 			.withDescription(activity.getBeskrivning())
 			.withLanguage(Optional.ofNullable(blankToNull(activity.getSprak())).orElse(DEFAULT_LANGUAGE))
-			.withOccurredAt(DateTimeUtil.parse(activity.getTidpunkt()))
+			.withOccurredAt(keepIfSameInstant(entity.getOccurredAt(), DateTimeUtil.parse(activity.getTidpunkt())))
 			.withActivityType(activity.getKundhandelseTyp())
 			.withCustomerActionRequired(activity.getProducentarendetKraverKundatgard())
 			.withErrandCompleted(activity.getProducentarendetKlart())
@@ -120,5 +121,13 @@ public final class ActivityMapper {
 
 	private static String blankToNull(final String value) {
 		return Optional.ofNullable(value).filter(not(String::isBlank)).orElse(null);
+	}
+
+	/**
+	 * Keeps the stored value when the point in time is unchanged. Hibernate compares OffsetDateTime with equals, so a
+	 * different offset alone would count as a change and update the row.
+	 */
+	private static OffsetDateTime keepIfSameInstant(final OffsetDateTime current, final OffsetDateTime incoming) {
+		return current != null && current.isEqual(incoming) ? current : incoming;
 	}
 }

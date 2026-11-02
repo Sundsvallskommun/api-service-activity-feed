@@ -83,7 +83,7 @@ public class ActivityService {
 	 * @return   true if the error is a collision on the unique constraint for kundhandelseId within the municipality
 	 */
 	static boolean isActivityIdCollision(final DataIntegrityViolationException e) {
-		return Stream.<Throwable>iterate(e, Objects::nonNull, Throwable::getCause)
+		return Stream.iterate(e, Objects::nonNull, Throwable::getCause)
 			.filter(ConstraintViolationException.class::isInstance)
 			.map(ConstraintViolationException.class::cast)
 			.map(ConstraintViolationException::getConstraintName)

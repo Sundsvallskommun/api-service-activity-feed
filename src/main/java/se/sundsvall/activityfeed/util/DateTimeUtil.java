@@ -30,12 +30,12 @@ public final class DateTimeUtil {
 	public static OffsetDateTime parse(final String value) {
 		try {
 			return OffsetDateTime.parse(value);
-		} catch (final DateTimeParseException ignored) {
+		} catch (final DateTimeParseException _) {
 			// try the local formats
 		}
 		try {
 			return LocalDateTime.parse(value).atZone(ZONE).toOffsetDateTime();
-		} catch (final DateTimeParseException ignored) {
+		} catch (final DateTimeParseException _) {
 			// try the next one
 		}
 		return LocalDateTime.parse(value, LOCAL_FORMAT).atZone(ZONE).toOffsetDateTime();

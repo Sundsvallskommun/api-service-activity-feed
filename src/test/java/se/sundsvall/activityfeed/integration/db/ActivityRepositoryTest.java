@@ -1,5 +1,6 @@
 package se.sundsvall.activityfeed.integration.db;
 
+import jakarta.persistence.EntityManager;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,9 @@ import se.sundsvall.activityfeed.api.model.Arende;
 import se.sundsvall.activityfeed.api.model.Kund;
 import se.sundsvall.activityfeed.api.model.Sortering;
 import se.sundsvall.activityfeed.integration.db.model.ActivityEntity;
+import se.sundsvall.activityfeed.service.mapper.ActivityMapper;
+import se.sundsvall.activityfeed.util.DateTimeUtil;
+import se.sundsvall.dept44.common.validators.annotation.OneOf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -32,6 +36,8 @@ import static se.sundsvall.activityfeed.integration.db.specification.ActivitySpe
 import static se.sundsvall.activityfeed.integration.db.specification.ActivitySpecification.withMunicipalityId;
 import static se.sundsvall.activityfeed.integration.db.specification.ActivitySpecification.withOccurredFrom;
 import static se.sundsvall.activityfeed.integration.db.specification.ActivitySpecification.withOccurredTo;
+import static se.sundsvall.activityfeed.service.TestdataFactory.PRODUCER;
+import static se.sundsvall.activityfeed.service.TestdataFactory.nyKundhandelse;
 
 /**
  * Repository and specification tests against MariaDB (Testcontainers) with the schema from Flyway.
@@ -53,6 +59,9 @@ class ActivityRepositoryTest {
 
 	@Autowired
 	private ActivityRepository repository;
+
+	@Autowired
+	private EntityManager entityManager;
 
 	@Test
 	void findByMunicipalityIdAndActivityId() {
@@ -110,6 +119,24 @@ class ActivityRepositoryTest {
 		entity.setTitle("Ändrad");
 		final var modified = repository.saveAndFlush(entity);
 		assertThat(modified.getModified()).isNotNull();
+	}
+
+	/**
+	 * A resend of an unchanged activity writes nothing. +05:30 is neither UTC nor Swedish time, so the offset read back
+	 * from the database differs from the one sent in, wherever the tests run. Only the point in time is the same.
+	 */
+	@Test
+	void resendOfUnchangedActivityDoesNotUpdateIt() {
+		final var activity = nyKundhandelse("TESTKOP-OMSANDNING-1").withTidpunkt("2026-09-20T13:30:00+05:30");
+		repository.saveAndFlush(ActivityMapper.toEntity(MUNICIPALITY_ID, PRODUCER, "6.1", activity, ActivityEntity.create()));
+		entityManager.clear();
+
+		final var stored = repository.findByMunicipalityIdAndActivityId(MUNICIPALITY_ID, "TESTKOP-OMSANDNING-1").orElseThrow();
+		repository.saveAndFlush(ActivityMapper.toEntity(MUNICIPALITY_ID, PRODUCER, "6.1", activity, stored));
+		entityManager.clear();
+
+		assertThat(repository.findByMunicipalityIdAndActivityId(MUNICIPALITY_ID, "TESTKOP-OMSANDNING-1"))
+			.hasValueSatisfying(entity -> assertThat(entity.getModified()).isNull());
 	}
 
 	@Test
@@ -230,6 +257,30 @@ class ActivityRepositoryTest {
 		assertThat(search(Specification.allOf(withOccurredFrom(null), withOccurredTo(null)))).hasSize(3);
 	}
 
+	/**
+	 * 02:30 on 2026-10-25 happens twice in Swedish time, first in summer time and an hour later in winter time. The day is
+	 * 25 hours long, and both ends of a date filter are inclusive to the millisecond (occurred_at is DATETIME(3)).
+	 */
+	@Test
+	void switchToWinterTimeIsSortedAndFilteredInSwedishTime() {
+		repository.saveAll(List.of(
+			activity("TESTKOP-DST-SISTA").withOccurredAt(OffsetDateTime.parse("2026-10-25T23:59:59.999+01:00")),
+			activity("TESTKOP-DST-VINTER").withOccurredAt(OffsetDateTime.parse("2026-10-25T02:30:00+01:00")),
+			activity("TESTKOP-DST-SOMMAR").withOccurredAt(OffsetDateTime.parse("2026-10-25T02:30:00+02:00")),
+			activity("TESTKOP-DST-FORSTA").withOccurredAt(OffsetDateTime.parse("2026-10-25T00:00:00+02:00")),
+			activity("TESTKOP-DST-FORE").withOccurredAt(OffsetDateTime.parse("2026-10-24T23:59:59.999+02:00")),
+			activity("TESTKOP-DST-EFTER").withOccurredAt(OffsetDateTime.parse("2026-10-26T00:00:00+01:00"))));
+		repository.flush();
+		entityManager.clear();
+
+		final var hits = repository.findAll(Specification.allOf(withMunicipalityId(MUNICIPALITY_ID), forParty(OTHER_CUSTOMER, null),
+			withOccurredFrom(DateTimeUtil.startOfDay("2026-10-25")), withOccurredTo(DateTimeUtil.endOfDay("2026-10-25")),
+			sortedBy(List.of(Sortering.create().withAttribut("TIDPUNKT").withStigande(true)))));
+
+		assertThat(hits).extracting(ActivityEntity::getActivityId)
+			.containsExactly("TESTKOP-DST-FORSTA", "TESTKOP-DST-SOMMAR", "TESTKOP-DST-VINTER", "TESTKOP-DST-SISTA");
+	}
+
 	@Test
 	void sortingOnSeveralAttributesAndPagination() {
 		final var sorting = List.of(
@@ -244,9 +295,16 @@ class ActivityRepositoryTest {
 		assertThat(page.getContent()).extracting(ActivityEntity::getActivityId).containsExactly("TESTKOP-FSK-1");
 	}
 
+	/**
+	 * Every value the API accepts has a sort expression. The values come from @OneOf on Sortering.attribut, so a value
+	 * added there but not to ActivitySpecification.SortAttribute fails here instead of in a query.
+	 */
 	@Test
-	void allSortAttributes() {
-		for (final var attribute : List.of("RUBRIK", "BESKRIVNING", "PRODUCENT", "TIDPUNKT", "KUNDHANDELSETYP", "PRODUCENTARENDETKRAVERKUNDATGARD", "PRODUCENTARENDETKLART")) {
+	void allSortAttributes() throws NoSuchFieldException {
+		final var attributes = Sortering.class.getDeclaredField("attribut").getAnnotation(OneOf.class).value();
+
+		assertThat(attributes).isNotEmpty();
+		for (final var attribute : attributes) {
 			final var sorting = List.of(Sortering.create().withAttribut(attribute).withStigande(true));
 			assertThat(repository.findAll(Specification.allOf(withMunicipalityId(MUNICIPALITY_ID), sortedBy(sorting)))).as(attribute).hasSize(4);
 		}

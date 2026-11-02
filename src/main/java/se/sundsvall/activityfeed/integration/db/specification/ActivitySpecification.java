@@ -129,8 +129,9 @@ public final class ActivitySpecification {
 	}
 
 	/**
-	 * The values of sortering.attribut in the API, which Sortering has already validated. A new value does not compile
-	 * until it has a sort expression.
+	 * The values of sortering.attribut in the API, which Sortering has already validated. A constant without a sort
+	 * expression does not compile, and a value in Sortering's @OneOf without a constant fails
+	 * ActivityRepositoryTest.allSortAttributes.
 	 */
 	enum SortAttribute {
 		RUBRIK, BESKRIVNING, PRODUCENT, TIDPUNKT, KUNDHANDELSETYP, PRODUCENTARENDETKRAVERKUNDATGARD, PRODUCENTARENDETKLART
