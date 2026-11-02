@@ -2,10 +2,6 @@ spring:
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     url: jdbc:tc:mariadb:10.6.14:///activityfeed
-security:
-  api-key:
-    query-keys: it-query-key-0123456789abcdef0123456789abcdef
-    admin-keys: it-admin-key-0123456789abcdef0123456789abcdef
 activity-feed:
   standard-version: '6.1'
   seed: false

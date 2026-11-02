@@ -10,12 +10,8 @@ import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static se.sundsvall.activityfeed.apptest.Constants.ADMIN_KEY;
-import static se.sundsvall.activityfeed.apptest.Constants.API_KEY_HEADER;
 import static se.sundsvall.activityfeed.apptest.Constants.CORRELATION_ID;
 import static se.sundsvall.activityfeed.apptest.Constants.CORRELATION_ID_HEADER;
-import static se.sundsvall.activityfeed.apptest.Constants.QUERY_KEY;
 
 /**
  * The query interface through the whole service against MariaDB.
@@ -36,7 +32,6 @@ class ActivityQueryIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(PATH)
 			.withHttpMethod(POST)
-			.withHeader(API_KEY_HEADER, QUERY_KEY)
 			.withHeader(CORRELATION_ID_HEADER, CORRELATION_ID)
 			.withHeader("Accept-Language", "sv")
 			.withRequest("request.json")
@@ -50,22 +45,9 @@ class ActivityQueryIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(PATH)
 			.withHttpMethod(POST)
-			.withHeader(API_KEY_HEADER, ADMIN_KEY)
 			.withHeader(CORRELATION_ID_HEADER, CORRELATION_ID)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(OK)
-			.withExpectedResponse("response.json")
-			.sendRequestAndVerifyResponse();
-	}
-
-	@Test
-	void test03_queryWithoutApiKey() {
-		setupCall()
-			.withServicePath(PATH)
-			.withHttpMethod(POST)
-			.withHeader(CORRELATION_ID_HEADER, CORRELATION_ID)
-			.withRequest("request.json")
-			.withExpectedResponseStatus(UNAUTHORIZED)
 			.withExpectedResponse("response.json")
 			.sendRequestAndVerifyResponse();
 	}
@@ -75,7 +57,6 @@ class ActivityQueryIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(PATH)
 			.withHttpMethod(POST)
-			.withHeader(API_KEY_HEADER, QUERY_KEY)
 			.withHeader(CORRELATION_ID_HEADER, CORRELATION_ID)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(BAD_REQUEST)
@@ -88,7 +69,6 @@ class ActivityQueryIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath("/1480/kundhandelseFragaSynkron")
 			.withHttpMethod(POST)
-			.withHeader(API_KEY_HEADER, QUERY_KEY)
 			.withHeader(CORRELATION_ID_HEADER, CORRELATION_ID)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(NOT_FOUND)

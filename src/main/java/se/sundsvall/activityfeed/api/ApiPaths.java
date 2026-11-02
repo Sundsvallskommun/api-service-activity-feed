@@ -25,7 +25,7 @@ public final class ApiPaths {
 
 	/**
 	 * The query interface answers with the error format in Skatteverket's API definition ({"message": "..."}) instead of
-	 * RFC 9457, also for errors raised before the request reaches the controller (401, 403, 405, 415).
+	 * RFC 9457, also for errors raised before the request reaches the controller (405, 415).
 	 *
 	 * @param  request the request
 	 * @return         true if the request is for the query interface

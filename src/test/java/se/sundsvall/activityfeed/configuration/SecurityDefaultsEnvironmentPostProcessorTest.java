@@ -26,9 +26,9 @@ class SecurityDefaultsEnvironmentPostProcessorTest {
 		postProcessor.postProcessEnvironment(environment, new SpringApplication());
 
 		assertThat(environment.getProperty("logging.level.se.sundsvall.dept44.payload")).isEqualTo("OFF");
-		assertThat(environment.getProperty("management.endpoints.web.exposure.include")).isEqualTo("health,info,flyway");
-		assertThat(environment.getProperty("management.endpoint.health.show-details")).isEqualTo("when-authorized");
-		assertThat(environment.getProperty("management.endpoint.health.roles")).isEqualTo("ADMIN");
+		assertThat(environment.getProperty("management.endpoints.web.exposure.include")).isEqualTo("health,info");
+		assertThat(environment.getProperty("management.endpoint.health.show-details")).isEqualTo("never");
+		assertThat(environment.getProperty("management.endpoint.health.show-components")).isEqualTo("never");
 
 		final var sources = environment.getPropertySources().stream().map(PropertySource::getName).toList();
 		assertThat(sources.indexOf(SecurityDefaultsEnvironmentPostProcessor.PROPERTY_SOURCE_NAME))

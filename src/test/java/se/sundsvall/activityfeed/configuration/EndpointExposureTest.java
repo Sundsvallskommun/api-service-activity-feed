@@ -21,17 +21,14 @@ import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 /**
- * API key protection through the whole filter chain. The keys come from the junit profile.
+ * What the service exposes through the whole filter chain: both interfaces, actuator, documentation, and the error
+ * format for a wrong method or media type.
  */
 @AutoConfigureWebTestClient
 @SpringBootTest(classes = Application.class, webEnvironment = RANDOM_PORT)
 @ActiveProfiles("junit")
-class ApiKeySecurityTest {
+class EndpointExposureTest {
 
-	static final String QUERY_KEY = "junit-query-key-0123456789abcdef0123456789";
-	static final String ADMIN_KEY = "junit-admin-key-0123456789abcdef0123456789";
-
-	private static final String HEADER = "X-API-Key";
 	private static final String QUERY_PATH = "/2281/kundhandelseFragaSynkron";
 	private static final String ACTIVITIES_PATH = "/2281/kundhandelser";
 	private static final String QUERY = """
@@ -48,77 +45,25 @@ class ApiKeySecurityTest {
 	private WebTestClient webTestClient;
 
 	@Test
-	void queryWithoutKeyGives401InSkatteverketFormat() {
-		webTestClient.post().uri(QUERY_PATH)
-			.contentType(APPLICATION_JSON)
-			.header("skv_client_correlation_id", "abc")
-			.bodyValue(QUERY)
-			.exchange()
-			.expectStatus().isUnauthorized()
-			.expectHeader().contentType(APPLICATION_JSON)
-			.expectHeader().valueEquals("WWW-Authenticate", "ApiKey header=\"X-API-Key\"")
-			.expectBody().json("""
-				{"message":"Unauthorized"}
-				""", true);
-	}
-
-	@Test
-	void queryWithWrongKeyGives401() {
-		webTestClient.post().uri(QUERY_PATH)
-			.contentType(APPLICATION_JSON)
-			.header(HEADER, "wrong-key-0123456789abcdef0123456789abcdef")
-			.header("skv_client_correlation_id", "abc")
-			.bodyValue(QUERY)
-			.exchange()
-			.expectStatus().isUnauthorized()
-			.expectBody().jsonPath("$.message").isEqualTo("Unauthorized");
-	}
-
-	@Test
-	void queryWithQueryAndAdminKey() {
+	void bothInterfacesAnswerWithoutCredentials() {
 		when(activityQueryService.answer(eq("2281"), any(), any())).thenReturn(KundhandelseFragaResponse.create());
-
-		for (final var key : new String[] {
-			QUERY_KEY, ADMIN_KEY
-		}) {
-			webTestClient.post().uri(QUERY_PATH)
-				.contentType(APPLICATION_JSON)
-				.header(HEADER, key)
-				.header("skv_client_correlation_id", "abc")
-				.bodyValue(QUERY)
-				.exchange()
-				.expectStatus().isOk();
-		}
-	}
-
-	@Test
-	void cacheEndpointsRequireAdminKey() {
 		when(activityService.count("2281")).thenReturn(3L);
 
-		webTestClient.get().uri(ACTIVITIES_PATH)
+		webTestClient.post().uri(QUERY_PATH)
+			.contentType(APPLICATION_JSON)
+			.header("skv_client_correlation_id", "abc")
+			.bodyValue(QUERY)
 			.exchange()
-			.expectStatus().isUnauthorized()
-			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
-			.expectBody()
-			.jsonPath("$.status").isEqualTo(401)
-			.jsonPath("$.title").isEqualTo("Unauthorized");
-
-		webTestClient.get().uri(ACTIVITIES_PATH + "/ID-1")
-			.header(HEADER, QUERY_KEY)
-			.exchange()
-			.expectStatus().isForbidden()
-			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
-			.expectBody().jsonPath("$.status").isEqualTo(403);
+			.expectStatus().isOk();
 
 		webTestClient.get().uri(ACTIVITIES_PATH)
-			.header(HEADER, ADMIN_KEY)
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody().jsonPath("$.antal").isEqualTo(3);
 	}
 
 	@Test
-	void healthIsOpenButDetailsRequireAdminKey() {
+	void healthIsOpenWithoutDetails() {
 		webTestClient.get().uri("/actuator/health")
 			.exchange()
 			.expectStatus().isOk()
@@ -126,26 +71,16 @@ class ApiKeySecurityTest {
 			.jsonPath("$.status").isEqualTo("UP")
 			.jsonPath("$.components").doesNotExist();
 
-		webTestClient.get().uri("/actuator/health")
-			.header(HEADER, ADMIN_KEY)
-			.exchange()
-			.expectStatus().isOk()
-			.expectBody().jsonPath("$.components.db.status").isEqualTo("UP");
-
 		webTestClient.get().uri("/actuator/health/readiness").exchange().expectStatus().isOk();
 		webTestClient.get().uri("/actuator/info").exchange().expectStatus().isOk();
 	}
 
 	@Test
-	void otherActuatorEndpointsAreClosedOrRequireAdminKey() {
-		webTestClient.get().uri("/actuator/flyway").exchange().expectStatus().isUnauthorized();
-		webTestClient.get().uri("/actuator/flyway").header(HEADER, QUERY_KEY).exchange().expectStatus().isForbidden();
-		webTestClient.get().uri("/actuator/flyway").header(HEADER, ADMIN_KEY).exchange().expectStatus().isOk();
-
+	void otherActuatorEndpointsAreNotExposed() {
 		for (final var endpoint : new String[] {
-			"env", "beans", "configprops", "loggers", "heapdump", "threaddump", "mappings"
+			"flyway", "env", "beans", "configprops", "loggers", "heapdump", "threaddump", "mappings"
 		}) {
-			webTestClient.get().uri("/actuator/" + endpoint).header(HEADER, ADMIN_KEY).exchange().expectStatus().isNotFound();
+			webTestClient.get().uri("/actuator/" + endpoint).exchange().expectStatus().isNotFound();
 		}
 	}
 
@@ -156,15 +91,13 @@ class ApiKeySecurityTest {
 	}
 
 	@Test
-	void unknownPathRequiresKey() {
-		webTestClient.get().uri("/does-not-exist").exchange().expectStatus().isUnauthorized();
-		webTestClient.get().uri("/does-not-exist").header(HEADER, ADMIN_KEY).exchange().expectStatus().isNotFound();
+	void unknownPathGives404() {
+		webTestClient.get().uri("/does-not-exist").exchange().expectStatus().isNotFound();
 	}
 
 	@Test
 	void wrongMethodAndContentTypeOnQuery() {
 		webTestClient.get().uri(QUERY_PATH)
-			.header(HEADER, QUERY_KEY)
 			.exchange()
 			.expectStatus().isEqualTo(405)
 			.expectHeader().contentType(APPLICATION_JSON)
@@ -173,7 +106,6 @@ class ApiKeySecurityTest {
 				""", true);
 
 		webTestClient.post().uri(QUERY_PATH)
-			.header(HEADER, QUERY_KEY)
 			.header("skv_client_correlation_id", "abc")
 			.contentType(TEXT_PLAIN)
 			.bodyValue("text")
@@ -187,7 +119,6 @@ class ApiKeySecurityTest {
 	@Test
 	void wrongMethodOnCacheGivesProblem() {
 		webTestClient.put().uri(ACTIVITIES_PATH)
-			.header(HEADER, ADMIN_KEY)
 			.contentType(APPLICATION_JSON)
 			.bodyValue("[]")
 			.exchange()

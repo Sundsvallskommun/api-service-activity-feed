@@ -5,7 +5,7 @@ openapi:
   description: >-
     Producent enligt Mina ärendens standard för samlad ärendeåterkoppling. Kundhändelser lagras i en ärendecache
     (MariaDB) och lämnas ut via samma operation som Skatteverkets vidareförmedlingstjänst använder:
-    POST /{municipalityId}/kundhandelseFragaSynkron. Alla anrop kräver API-nyckel i headern X-API-Key.
+    POST /{municipalityId}/kundhandelseFragaSynkron.
 spring:
   application:
     name: api-activity-feed
@@ -48,12 +48,6 @@ logbook:
         value: '************'
       - key: '$..identifierare'
         value: '************'
-security:
-  api-key:
-    header-name: X-API-Key
-    # Comma-separated lists. At least one key is required, otherwise the service does not start. See README (Security).
-    query-keys: ${API_KEYS_QUERY:}
-    admin-keys: ${API_KEYS_ADMIN:${ADMIN_API_KEY:}}
 activity-feed:
   standard-version: ${ACTIVITY_FEED_STANDARD_VERSION:6.1}
   # Load sample activities at startup for municipalities without activities (development and demo only).

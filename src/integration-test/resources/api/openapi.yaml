@@ -3,8 +3,7 @@ info:
   title: Mina ärenden – producent med ärendecache
   description: "Producent enligt Mina ärendens standard för samlad ärendeåterkoppling.\
     \ Kundhändelser lagras i en ärendecache (MariaDB) och lämnas ut via samma operation\
-    \ som Skatteverkets vidareförmedlingstjänst använder: POST /{municipalityId}/kundhandelseFragaSynkron.\
-    \ Alla anrop kräver API-nyckel i headern X-API-Key."
+    \ som Skatteverkets vidareförmedlingstjänst använder: POST /{municipalityId}/kundhandelseFragaSynkron."
   contact: {}
   license:
     name: MIT License
@@ -13,8 +12,6 @@ info:
 servers:
   - url: http://localhost:64053
     description: Generated server url
-security:
-  - ApiKey: []
 tags:
   - name: Ärendecache
     description: "Läs in, hämta och ta bort kundhändelser i cachen"
@@ -50,18 +47,6 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/Problem"
                   - $ref: "#/components/schemas/ConstraintViolationProblem"
-        "401":
-          description: API-nyckel saknas eller är ogiltig
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-        "403":
-          description: API-nyckeln är inte en admin-nyckel
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
         "404":
           description: Not found
           content:
@@ -119,18 +104,6 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/Problem"
                   - $ref: "#/components/schemas/ConstraintViolationProblem"
-        "401":
-          description: API-nyckel saknas eller är ogiltig
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-        "403":
-          description: API-nyckeln är inte en admin-nyckel
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
         "404":
           description: Not found
           content:
@@ -151,7 +124,7 @@ paths:
       description: "Besvarar frågan ur ärendecachen. Parter kan anges som kund, ä\
         rende eller båda. Filtrera med kundhandelseTyper (prefix matchar underliggande\
         \ typer), taggar och datumintervall. Sortering och paginering styrs med behandling;\
-        \ paginering kräver sortering. Kräver en fråge- eller admin-nyckel."
+        \ paginering kräver sortering."
       operationId: kundhandelseFragaSynkron
       parameters:
         - name: municipalityId
@@ -193,12 +166,6 @@ paths:
                 $ref: "#/components/schemas/KundhandelseFragaResponse"
         "400":
           description: Frågan är inte korrekt ställd
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "401":
-          description: API-nyckel saknas eller är ogiltig
           content:
             application/json:
               schema:
@@ -253,18 +220,6 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/Problem"
                   - $ref: "#/components/schemas/ConstraintViolationProblem"
-        "401":
-          description: API-nyckel saknas eller är ogiltig
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-        "403":
-          description: API-nyckeln är inte en admin-nyckel
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
         "404":
           description: Not found
           content:
@@ -310,18 +265,6 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/Problem"
                   - $ref: "#/components/schemas/ConstraintViolationProblem"
-        "401":
-          description: API-nyckel saknas eller är ogiltig
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
-        "403":
-          description: API-nyckeln är inte en admin-nyckel
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/Problem"
         "404":
           description: Not found
           content:
@@ -810,10 +753,4 @@ components:
           items:
             type: string
       readOnly: true
-  securitySchemes:
-    ApiKey:
-      type: apiKey
-      description: "API-nyckel. Fråge-nycklar (API_KEYS_QUERY) når /{municipalityId}/kundhandelseFragaSynkron,\
-        \ admin-nycklar (API_KEYS_ADMIN) når alla gränssnitt."
-      name: X-API-Key
-      in: header
+  securitySchemes: {}

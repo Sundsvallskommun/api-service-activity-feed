@@ -35,8 +35,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  *
  * <p>
  * Applies only to {@link ActivityQueryResource} and runs before dept44's ProblemExceptionHandler. Errors raised before
- * the request reaches the controller are handled by {@link ActivityQueryRoutingExceptionHandler} and
- * se.sundsvall.activityfeed.configuration.ApiKeyFailureHandler.
+ * the request reaches the controller are handled by {@link ActivityQueryRoutingExceptionHandler}.
  */
 @RestControllerAdvice(assignableTypes = ActivityQueryResource.class)
 @Order(Ordered.HIGHEST_PRECEDENCE)

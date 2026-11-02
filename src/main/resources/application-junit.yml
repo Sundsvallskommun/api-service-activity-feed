@@ -19,10 +19,6 @@ spring:
             scripts:
               action: create
               create-target: target/database/generated-schema.sql
-security:
-  api-key:
-    query-keys: junit-query-key-0123456789abcdef0123456789
-    admin-keys: junit-admin-key-0123456789abcdef0123456789
 activity-feed:
   standard-version: '6.1'
   seed: false

@@ -45,7 +45,6 @@ class ActivityQueryResourceFailureTest {
 	void correlationIdMissing() {
 		webTestClient.post().uri(ActivityQueryResourceTest.PATH)
 			.contentType(APPLICATION_JSON)
-			.header("X-API-Key", ActivityQueryResourceTest.API_KEY)
 			.bodyValue(VALID_QUERY)
 			.exchange()
 			.expectStatus().isBadRequest()
@@ -116,7 +115,6 @@ class ActivityQueryResourceFailureTest {
 
 		webTestClient.post().uri("/2262/kundhandelseFragaSynkron")
 			.contentType(APPLICATION_JSON)
-			.header("X-API-Key", ActivityQueryResourceTest.API_KEY)
 			.header("skv_client_correlation_id", "abc")
 			.bodyValue(VALID_QUERY)
 			.exchange()
@@ -130,7 +128,6 @@ class ActivityQueryResourceFailureTest {
 	void invalidMunicipalityId() {
 		webTestClient.post().uri("/abc/kundhandelseFragaSynkron")
 			.contentType(APPLICATION_JSON)
-			.header("X-API-Key", ActivityQueryResourceTest.API_KEY)
 			.header("skv_client_correlation_id", "abc")
 			.bodyValue(VALID_QUERY)
 			.exchange()
@@ -152,7 +149,6 @@ class ActivityQueryResourceFailureTest {
 	private void postQuery(final String correlationId, final String body, final int status, final String expectedMessage) {
 		webTestClient.post().uri(ActivityQueryResourceTest.PATH)
 			.contentType(APPLICATION_JSON)
-			.header("X-API-Key", ActivityQueryResourceTest.API_KEY)
 			.header("skv_client_correlation_id", correlationId)
 			.bodyValue(body)
 			.exchange()

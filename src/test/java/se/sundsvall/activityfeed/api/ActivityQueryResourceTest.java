@@ -33,7 +33,6 @@ import static se.sundsvall.activityfeed.service.TestdataFactory.fraga;
 class ActivityQueryResourceTest {
 
 	static final String PATH = "/2281/kundhandelseFragaSynkron";
-	static final String API_KEY = "junit-query-key-0123456789abcdef0123456789";
 
 	@MockitoBean
 	private ActivityQueryService activityQueryService;
@@ -54,7 +53,6 @@ class ActivityQueryResourceTest {
 
 		final var response = webTestClient.post().uri(PATH)
 			.contentType(APPLICATION_JSON)
-			.header("X-API-Key", API_KEY)
 			.header("skv_client_correlation_id", "0002aa29-49f2-4baf-be51-c7c39c9824b4")
 			.header("Accept-Language", "sv")
 			.bodyValue(request)
@@ -76,7 +74,6 @@ class ActivityQueryResourceTest {
 
 		webTestClient.post().uri(PATH)
 			.contentType(APPLICATION_JSON)
-			.header("X-API-Key", API_KEY)
 			.header("skv_client_correlation_id", "anrop-4711")
 			.bodyValue(fraga())
 			.exchange()

@@ -38,7 +38,7 @@ import static org.springframework.http.ResponseEntity.status;
 
 /**
  * Ingest into the activity cache. The business system, or an integration platform, sends activities here when something
- * happens in an errand. Requires an admin key.
+ * happens in an errand.
  */
 @RestController
 @Validated
@@ -46,8 +46,6 @@ import static org.springframework.http.ResponseEntity.status;
 @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(oneOf = {
 	Problem.class, ConstraintViolationProblem.class
 })))
-@ApiResponse(responseCode = "401", description = "API-nyckel saknas eller är ogiltig", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
-@ApiResponse(responseCode = "403", description = "API-nyckeln är inte en admin-nyckel", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 @ApiResponse(responseCode = "404", description = "Not found", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 @ApiResponse(responseCode = "500", description = "Internal Server error", content = @Content(mediaType = APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = Problem.class)))
 class ActivityResource {

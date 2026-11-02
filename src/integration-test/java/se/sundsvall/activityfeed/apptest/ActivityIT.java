@@ -11,13 +11,9 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
-import static se.sundsvall.activityfeed.apptest.Constants.ADMIN_KEY;
-import static se.sundsvall.activityfeed.apptest.Constants.API_KEY_HEADER;
-import static se.sundsvall.activityfeed.apptest.Constants.QUERY_KEY;
 
 /**
  * Maintenance of the activity cache through the whole service against MariaDB.
@@ -38,7 +34,6 @@ class ActivityIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(PATH)
 			.withHttpMethod(POST)
-			.withHeader(API_KEY_HEADER, ADMIN_KEY)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(CREATED)
 			.withExpectedResponse("response.json")
@@ -48,7 +43,6 @@ class ActivityIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(PATH + "/TESTKOP-BYGG-2026-00123-1")
 			.withHttpMethod(GET)
-			.withHeader(API_KEY_HEADER, ADMIN_KEY)
 			.withExpectedResponseStatus(OK)
 			.withExpectedResponse("replaced.json")
 			.sendRequestAndVerifyResponse();
@@ -56,7 +50,6 @@ class ActivityIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(PATH)
 			.withHttpMethod(GET)
-			.withHeader(API_KEY_HEADER, ADMIN_KEY)
 			.withExpectedResponseStatus(OK)
 			.withExpectedResponse("count.json")
 			.sendRequestAndVerifyResponse();
@@ -67,7 +60,6 @@ class ActivityIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(PATH + "/TESTKOP-BYGG-2026-00123-2")
 			.withHttpMethod(GET)
-			.withHeader(API_KEY_HEADER, ADMIN_KEY)
 			.withExpectedResponseStatus(OK)
 			.withExpectedResponse("response.json")
 			.sendRequestAndVerifyResponse();
@@ -78,14 +70,12 @@ class ActivityIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(PATH + "/TESTKOP-FSK-2026-00777-1")
 			.withHttpMethod(DELETE)
-			.withHeader(API_KEY_HEADER, ADMIN_KEY)
 			.withExpectedResponseStatus(NO_CONTENT)
 			.sendRequestAndVerifyResponse();
 
 		setupCall()
 			.withServicePath(PATH + "/TESTKOP-FSK-2026-00777-1")
 			.withHttpMethod(GET)
-			.withHeader(API_KEY_HEADER, ADMIN_KEY)
 			.withExpectedResponseStatus(NOT_FOUND)
 			.withExpectedResponse("response.json")
 			.sendRequestAndVerifyResponse();
@@ -96,20 +86,7 @@ class ActivityIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath("/2262/kundhandelser/TESTKOP-BYGG-2026-00123-1")
 			.withHttpMethod(GET)
-			.withHeader(API_KEY_HEADER, ADMIN_KEY)
 			.withExpectedResponseStatus(NOT_FOUND)
-			.withExpectedResponse("response.json")
-			.sendRequestAndVerifyResponse();
-	}
-
-	@Test
-	void test05_queryKeyCannotSave() {
-		setupCall()
-			.withServicePath(PATH)
-			.withHttpMethod(POST)
-			.withHeader(API_KEY_HEADER, QUERY_KEY)
-			.withRequest("request.json")
-			.withExpectedResponseStatus(FORBIDDEN)
 			.withExpectedResponse("response.json")
 			.sendRequestAndVerifyResponse();
 	}
@@ -119,7 +96,6 @@ class ActivityIT extends AbstractAppTest {
 		setupCall()
 			.withServicePath(PATH)
 			.withHttpMethod(POST)
-			.withHeader(API_KEY_HEADER, ADMIN_KEY)
 			.withRequest("request.json")
 			.withExpectedResponseStatus(BAD_REQUEST)
 			.withExpectedResponse("response.json")

@@ -11,11 +11,8 @@ import se.sundsvall.activityfeed.Application;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static se.sundsvall.activityfeed.apptest.Constants.ADMIN_KEY;
-import static se.sundsvall.activityfeed.apptest.Constants.API_KEY_HEADER;
 import static se.sundsvall.activityfeed.apptest.Constants.CORRELATION_ID;
 import static se.sundsvall.activityfeed.apptest.Constants.CORRELATION_ID_HEADER;
-import static se.sundsvall.activityfeed.apptest.Constants.QUERY_KEY;
 
 /**
  * The query rules (the standard and Skatteverket's API definition) against MariaDB, including the order of the results.
@@ -78,7 +75,6 @@ class ActivityQueryBehaviorIT {
 	void severalPartiesAreAnsweredSeparatelyAndOnlyForTheMunicipality() {
 		webTestClient.post().uri("/2281/kundhandelseFragaSynkron")
 			.contentType(APPLICATION_JSON)
-			.header(API_KEY_HEADER, QUERY_KEY)
 			.header(CORRELATION_ID_HEADER, CORRELATION_ID)
 			.bodyValue("""
 				{"fraga":{"parter":[%s,{"kund":{"identifierare":"165560001234","typ":"Organisationsnummer"}},{"arende":{"identifierare":"FINNS-INTE","typ":"Diarienummer"}}]},"anvandare":"199009090000"}
@@ -95,7 +91,6 @@ class ActivityQueryBehaviorIT {
 		// The same customer in municipality 2262 only gives Timrå's activity.
 		webTestClient.post().uri("/2262/kundhandelseFragaSynkron")
 			.contentType(APPLICATION_JSON)
-			.header(API_KEY_HEADER, QUERY_KEY)
 			.header(CORRELATION_ID_HEADER, CORRELATION_ID)
 			.bodyValue("{\"fraga\":{\"parter\":[" + CUSTOMER + "]},\"anvandare\":\"199009090000\"}")
 			.exchange()
@@ -112,7 +107,6 @@ class ActivityQueryBehaviorIT {
 		// but chronologically +02:00 (summer time) comes first. Sorting must use the point in time, not the text.
 		webTestClient.post().uri("/2281/kundhandelser")
 			.contentType(APPLICATION_JSON)
-			.header(API_KEY_HEADER, ADMIN_KEY)
 			.bodyValue("""
 				[{"kundhandelseId":"DST-VINTER","part":{"kund":{"identifierare":"197001010001","typ":"Personnummer"}},
 				  "rubrik":"Efter omställning","beskrivning":"b","tidpunkt":"2026-10-25T02:30:00+01:00",
@@ -126,7 +120,6 @@ class ActivityQueryBehaviorIT {
 
 		webTestClient.post().uri("/2281/kundhandelseFragaSynkron")
 			.contentType(APPLICATION_JSON)
-			.header(API_KEY_HEADER, QUERY_KEY)
 			.header(CORRELATION_ID_HEADER, CORRELATION_ID)
 			.bodyValue("""
 				{"fraga":{"parter":[{"kund":{"identifierare":"197001010001","typ":"Personnummer"}}],
@@ -153,14 +146,12 @@ class ActivityQueryBehaviorIT {
 		}) {
 			webTestClient.post().uri("/2281/kundhandelser")
 				.contentType(APPLICATION_JSON)
-				.header(API_KEY_HEADER, ADMIN_KEY)
 				.bodyValue(activity.formatted(title))
 				.exchange()
 				.expectStatus().isCreated();
 		}
 
 		webTestClient.get().uri("/2281/kundhandelser/TEST-1")
-			.header(API_KEY_HEADER, ADMIN_KEY)
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody()
@@ -168,7 +159,6 @@ class ActivityQueryBehaviorIT {
 			.jsonPath("$.kundhandelse.tidpunkt").isEqualTo("2026-09-15T12:00:00+02:00");
 
 		webTestClient.get().uri("/2281/kundhandelser")
-			.header(API_KEY_HEADER, ADMIN_KEY)
 			.exchange()
 			.expectBody().jsonPath("$.antal").isEqualTo(6);
 	}
@@ -176,7 +166,6 @@ class ActivityQueryBehaviorIT {
 	private WebTestClient.BodyContentSpec query(final String filter) {
 		return webTestClient.post().uri("/2281/kundhandelseFragaSynkron")
 			.contentType(APPLICATION_JSON)
-			.header(API_KEY_HEADER, QUERY_KEY)
 			.header(CORRELATION_ID_HEADER, CORRELATION_ID)
 			.bodyValue("{\"fraga\":{\"parter\":[" + CUSTOMER + "]," + filter + "},\"anvandare\":\"199009090000\"}")
 			.exchange()

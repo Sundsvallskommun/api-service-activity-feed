@@ -54,11 +54,10 @@ class ActivityQueryResource {
 		summary = "Hämta kundhändelser för en eller flera parter (synkron fråga)",
 		description = "Besvarar frågan ur ärendecachen. Parter kan anges som kund, ärende eller båda. Filtrera med kundhandelseTyper "
 			+ "(prefix matchar underliggande typer), taggar och datumintervall. Sortering och paginering styrs med behandling; "
-			+ "paginering kräver sortering. Kräver en fråge- eller admin-nyckel.",
+			+ "paginering kräver sortering.",
 		responses = {
 			@ApiResponse(responseCode = "200", description = "Lyckat anrop", useReturnTypeSchema = true),
 			@ApiResponse(responseCode = "400", description = "Frågan är inte korrekt ställd", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = "API-nyckel saknas eller är ogiltig", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "404", description = "Kommunen är inte konfigurerad som producent", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "500", description = "Internt fel", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class)))
 		})

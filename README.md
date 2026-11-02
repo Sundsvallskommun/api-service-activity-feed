@@ -16,9 +16,6 @@ Forwarding service (Skatteverket) ──POST /{municipalityId}/kundhandelseFraga
   sorting and pagination.
 - **Activity cache.** `POST|GET|DELETE /{municipalityId}/kundhandelser` for the business system. Errors follow
   RFC 9457 (dept44 `Problem`).
-- **Security.** Every request needs an API key in the `X-API-Key` header (see [Security](#security)).
-- **Operations.** A container with a health check, `docker-compose.yml` with an internal MariaDB, a backup on every
-  redeploy, and Flyway migrations that never empty the database. See [docs/dokploy.md](docs/dokploy.md).
 
 ## Getting Started
 
@@ -26,8 +23,8 @@ Forwarding service (Skatteverket) ──POST /{municipalityId}/kundhandelseFraga
 
 - **Java 25**
 - **Maven 3.9.9+**
-- **Docker** (Testcontainers in the tests, and for running with Docker Compose)
-- **MariaDB** (included in Docker Compose)
+- **Docker** (Testcontainers in the tests)
+- **MariaDB**
 - **Git**
 
 ### Installation
@@ -39,23 +36,13 @@ git clone https://github.com/Sundsvallskommun/api-service-activity-feed.git
 cd api-service-activity-feed
 ```
 
-2. **Configure the service.** See [Configuration](#configuration). The service does not start without at least one
-   API key.
+2. **Configure the service.** See [Configuration](#configuration).
 
-3. **Build and run.**
-
-With Docker Compose, which builds the service and starts MariaDB:
-
-```bash
-cp .env.example .env        # set DB_PASSWORD, DB_ROOT_PASSWORD and API_KEYS_ADMIN (openssl rand -hex 32)
-docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
-```
-
-With Maven against your own MariaDB:
+3. **Build and run** with Maven against a MariaDB:
 
 ```bash
 export DB_URL=jdbc:mariadb://localhost:3306/activityfeed DB_USER=activityfeed DB_PASSWORD=secret
-export API_KEYS_ADMIN=$(openssl rand -hex 32) ACTIVITY_FEED_SEED=true
+export ACTIVITY_FEED_SEED=true
 mvn spring-boot:run
 ```
 
@@ -63,7 +50,7 @@ With `ACTIVITY_FEED_SEED=true` the service loads five sample activities on first
 (`src/main/resources/sample-activities.json`), so you can try queries right away.
 
 More test data, 49 activities for individuals and companies across many errand types, loads through the API with
-`API_KEYS_ADMIN=<key> ./tools/testdata/load.sh [base-url] [municipality-id] [prefix]`. The customers have
+`./tools/testdata/load.sh [base-url] [municipality-id] [prefix]`. The customers have
 Skatteverket's test personal identity numbers.
 
 ### Tests
@@ -74,8 +61,7 @@ mvn verify
 
 Unit tests (`src/test`) and application tests (`src/integration-test`, `*IT`) run against MariaDB 11.4 through
 Testcontainers, so Docker must be available. `mvn verify` also checks the formatting (`mvn dept44-formatting:apply`
-fixes it) and the coverage (JaCoCo, dept44 standard). `docker/redeploy-test.sh` builds the container, does a
-redeploy and checks that the data is still there. CI runs it (`.github/workflows/docker_ci.yml`).
+fixes it) and the coverage (JaCoCo, dept44 standard).
 
 ## Dependencies
 
@@ -84,8 +70,7 @@ business systems call it to load activities.
 
 ## API Documentation
 
-- **Swagger UI:** [http://localhost:8080/](http://localhost:8080/) (also `/swagger-ui/index.html`). The *Authorize*
-  button takes the API key.
+- **Swagger UI:** [http://localhost:8080/](http://localhost:8080/) (also `/swagger-ui/index.html`).
 - **OpenAPI:** [http://localhost:8080/api-docs](http://localhost:8080/api-docs). `OpenApiSpecificationIT` compares
   the service's spec with the checked-in one (`src/integration-test/resources/api/openapi.yaml`).
 
@@ -100,7 +85,6 @@ definition.
 
 ```bash
 curl -s http://localhost:8080/2281/kundhandelseFragaSynkron \
-  -H "X-API-Key: $API_KEYS_QUERY" \
   -H 'Content-Type: application/json' \
   -H 'skv_client_correlation_id: 0002aa29-49f2-4baf-be51-c7c39c9824b4' \
   -H 'Accept-Language: sv' \
@@ -129,7 +113,7 @@ a producer fails.
 | `startDatum`, `slutDatum`  | Inclusive, 00:00 to 23:59:59.999 Swedish time                                          |
 | `behandling.sortering`     | Several attributes in priority order. Without sorting, newest first                    |
 | `behandling.paginering`    | Requires sorting. `totaltAntalKundhandelser` gives the count before pagination         |
-| Errors                     | `{"message": "..."}` with 400, 401, 404, 405, 409, 415 or 500                          |
+| Errors                     | `{"message": "..."}` with 400, 404, 405, 409, 415 or 500                               |
 
 Required header: `skv_client_correlation_id`, a non-empty string of printable characters, at most 200. The service
 puts the value in the MDC as `skvClientCorrelationId` next to dept44's `x-request-id`. Limits per request
@@ -138,7 +122,7 @@ puts the value in the MDC as `skvClientCorrelationId` next to dept44's `x-reques
 ### Load activities into the cache
 
 ```bash
-curl -s http://localhost:8080/2281/kundhandelser -H "X-API-Key: $API_KEYS_ADMIN" -H 'Content-Type: application/json' -d '[{
+curl -s http://localhost:8080/2281/kundhandelser -H 'Content-Type: application/json' -d '[{
   "kundhandelseId": "REFKOM-BYGG-2026-00123-3",
   "part": { "kund": { "identifierare": "199009090000", "typ": "Personnummer" },
             "arende": { "identifierare": "BYGG-2026-00123", "typ": "Diarienummer" } },
@@ -165,47 +149,29 @@ There are also `GET /{municipalityId}/kundhandelser/{kundhandelseId}`,
 
 ## Security
 
-Every request needs an API key in the `X-API-Key` header, except the documentation (`/`, `/api-docs`, Swagger UI) and
-`/actuator/health`, `/actuator/info`.
+The service does no authentication of its own. dept44's `SecurityConfiguration` lets every request through, as in the
+other dept44 services, so access control is up to the environment the service runs in.
 
-|    Key    | Environment variable |                                  May call                                   |
-|-----------|----------------------|-----------------------------------------------------------------------------|
-| Query key | `API_KEYS_QUERY`     | `/{municipalityId}/kundhandelseFragaSynkron`                                |
-| Admin key | `API_KEYS_ADMIN`     | Everything: queries, the activity cache, `/actuator/flyway`, health details |
-
-- Both are comma-separated lists, so a new key can be added before the old one is removed.
-- Each key must be at least 32 characters (`openssl rand -hex 32` gives 64). Without a valid key the service does not
-  start. The protection cannot be turned off.
-- A missing or wrong key gives `401`, and a query key against the activity cache gives `403`. The query interface
-  answers in Skatteverket's format (`{"message":"Unauthorized"}`), the other interfaces with RFC 9457.
-- The service keeps the keys only as SHA-256 hashes in memory and compares them in constant time. Logs and the MDC
-  (`apiKeyId`) show only the key's position, e.g. `admin-1` or `query-2`.
-- `SECURITY_APIKEY_HEADERNAME` changes the header name.
-
-[docs/dokploy.md](docs/dokploy.md#api-keys) describes how to set and rotate the keys in Dokploy.
-
-dept44's defaults log request payloads (including the header with the API key), expose every actuator endpoint and
-show health details to everyone. They take precedence over the service's `application.yml`, so
-`SecurityDefaultsEnvironmentPostProcessor` puts the service's values above the configuration files. That means no
-payload logging, only `health`, `info` and `flyway` exposed, and health details only with an admin key. Environment
-variables still take precedence, e.g. `LOGGING_LEVEL_SE_SUNDSVALL_DEPT44_PAYLOAD=TRACE` for local debugging. The
-headers, and so the API key, are then logged, but `logbook.body-filters` masks personal identity numbers. The service
-itself never logs personal identity numbers and masks them in `toString()` (dept44 `PiiMasker`).
+dept44's defaults log request payloads, expose every actuator endpoint and show health details to everyone. They take
+precedence over the service's `application.yml`, so `SecurityDefaultsEnvironmentPostProcessor` puts the service's
+values above the configuration files. That means no payload logging, only `health` and `info` exposed, and no health
+details. Environment variables still take precedence, e.g. `LOGGING_LEVEL_SE_SUNDSVALL_DEPT44_PAYLOAD=TRACE` for local
+debugging or `MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE` for more actuator endpoints. `logbook.body-filters` masks
+personal identity numbers in logged payloads. The service itself never logs personal identity numbers and masks them in
+`toString()` (dept44 `PiiMasker`).
 
 ## Configuration
 
-|             Variable             |                   Default                    |                              Description                              |
-|----------------------------------|----------------------------------------------|-----------------------------------------------------------------------|
-| `DB_URL`                         | `jdbc:mariadb://localhost:3306/activityfeed` | JDBC URL to MariaDB                                                   |
-| `DB_USER`, `DB_PASSWORD`         | `activityfeed` / `activityfeed`              | Database user                                                         |
-| `API_KEYS_ADMIN`                 | empty                                        | Admin keys, comma-separated. `ADMIN_API_KEY` is read if it is not set |
-| `API_KEYS_QUERY`                 | empty                                        | Query keys, comma-separated                                           |
-| `ACTIVITY_FEED_MUNICIPALITY_ID`  | `2281`                                       | Municipality id of the producer                                       |
-| `ACTIVITY_FEED_PRODUCER_NAME`    | `Referenskommunen`                           | The producer's name in responses                                      |
-| `ACTIVITY_FEED_PREFIX`           | `REFKOM`                                     | Producer prefix in activity types (uppercase A-Z)                     |
-| `ACTIVITY_FEED_STANDARD_VERSION` | `6.1`                                        | Standard version given in `version`                                   |
-| `ACTIVITY_FEED_SEED`             | `false`                                      | Load sample activities if the municipality has none (demo only)       |
-| `SERVER_PORT`                    | `8080`                                       | Listening port                                                        |
+|             Variable             |                   Default                    |                           Description                           |
+|----------------------------------|----------------------------------------------|-----------------------------------------------------------------|
+| `DB_URL`                         | `jdbc:mariadb://localhost:3306/activityfeed` | JDBC URL to MariaDB                                             |
+| `DB_USER`, `DB_PASSWORD`         | `activityfeed` / `activityfeed`              | Database user                                                   |
+| `ACTIVITY_FEED_MUNICIPALITY_ID`  | `2281`                                       | Municipality id of the producer                                 |
+| `ACTIVITY_FEED_PRODUCER_NAME`    | `Referenskommunen`                           | The producer's name in responses                                |
+| `ACTIVITY_FEED_PREFIX`           | `REFKOM`                                     | Producer prefix in activity types (uppercase A-Z)               |
+| `ACTIVITY_FEED_STANDARD_VERSION` | `6.1`                                        | Standard version given in `version`                             |
+| `ACTIVITY_FEED_SEED`             | `false`                                      | Load sample activities if the municipality has none (demo only) |
+| `SERVER_PORT`                    | `8080`                                       | Listening port                                                  |
 
 `ACTIVITY_FEED_MUNICIPALITY_ID`, `ACTIVITY_FEED_PRODUCER_NAME` and `ACTIVITY_FEED_PREFIX` fill in the single producer
 in `activity-feed.producers`. For an instance that is the producer for several municipalities, give the whole list
@@ -232,15 +198,10 @@ activity_tag
   activity_ref → activity.id, tag
 ```
 
-## Deploy
-
-The first version deploys to Dokploy as a Compose service with an internal database. Step by step, API keys, redeploy,
-backups and restore: **[docs/dokploy.md](docs/dokploy.md)**.
-
 ## Limitations
 
-- No OAuth 2. Skatteverket's forwarding service authenticates against producers according to the connection terms.
-  The API key is a simple protection that can be complemented or replaced once those terms are known.
+- The service does not authenticate callers. Skatteverket's forwarding service authenticates against producers
+  according to the connection terms, and that has to be handled in front of the service or added to it.
 - The service does not authorize the end user (`anvandare`). The producer is responsible for that in production.
 - Only the synchronous query is implemented. The other parts of the standard are on
   [dataportal.se](https://www.dataportal.se/specifications/minaarenden/6.1).

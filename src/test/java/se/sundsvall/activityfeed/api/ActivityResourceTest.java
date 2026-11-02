@@ -28,7 +28,6 @@ import static se.sundsvall.activityfeed.service.TestdataFactory.part;
 class ActivityResourceTest {
 
 	static final String PATH = "/2281/kundhandelser";
-	static final String API_KEY = "junit-admin-key-0123456789abcdef0123456789";
 
 	@MockitoBean
 	private ActivityService activityService;
@@ -43,7 +42,6 @@ class ActivityResourceTest {
 
 		final var response = webTestClient.post().uri(PATH)
 			.contentType(APPLICATION_JSON)
-			.header("X-API-Key", API_KEY)
 			.bodyValue(activities)
 			.exchange()
 			.expectStatus().isCreated()
@@ -61,7 +59,6 @@ class ActivityResourceTest {
 		when(activityService.read("2281", "TESTKOP-1")).thenReturn(cached);
 
 		final var response = webTestClient.get().uri(PATH + "/TESTKOP-1")
-			.header("X-API-Key", API_KEY)
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody(CachadKundhandelse.class)
@@ -74,7 +71,6 @@ class ActivityResourceTest {
 	@Test
 	void taBortKundhandelse() {
 		webTestClient.delete().uri(PATH + "/TESTKOP-1")
-			.header("X-API-Key", API_KEY)
 			.exchange()
 			.expectStatus().isNoContent();
 
@@ -86,7 +82,6 @@ class ActivityResourceTest {
 		when(activityService.count("2281")).thenReturn(5L);
 
 		webTestClient.get().uri(PATH)
-			.header("X-API-Key", API_KEY)
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody().json("""

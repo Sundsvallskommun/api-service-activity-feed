@@ -1,2 +1,2 @@
-# Scripts that run in Linux containers must have LF line endings
+# Shell scripts need LF line endings to run
 *.sh text eol=lf

@@ -76,7 +76,6 @@ class ActivityResourceFailureTest {
 		when(activityService.read("2281", "X")).thenThrow(Problem.valueOf(NOT_FOUND, "Kundhändelsen X finns inte"));
 
 		webTestClient.get().uri(ActivityResourceTest.PATH + "/X")
-			.header("X-API-Key", ActivityResourceTest.API_KEY)
 			.exchange()
 			.expectStatus().isNotFound()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -97,7 +96,6 @@ class ActivityResourceFailureTest {
 	@Test
 	void invalidMunicipalityId() {
 		webTestClient.get().uri("/abc/kundhandelser")
-			.header("X-API-Key", ActivityResourceTest.API_KEY)
 			.exchange()
 			.expectStatus().isBadRequest()
 			.expectHeader().contentType(APPLICATION_PROBLEM_JSON)
@@ -108,7 +106,6 @@ class ActivityResourceFailureTest {
 	private WebTestClient.ResponseSpec post(final Object body) {
 		return webTestClient.post().uri(ActivityResourceTest.PATH)
 			.contentType(APPLICATION_JSON)
-			.header("X-API-Key", ActivityResourceTest.API_KEY)
 			.bodyValue(body)
 			.exchange();
 	}
