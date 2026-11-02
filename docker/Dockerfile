@@ -1,21 +1,21 @@
-# Bygger tjänsten ur källkoden, så att Dokploy (och docker compose) kan bygga direkt från repot.
-# Testerna körs i CI (.github/workflows), inte här.
+# Builds the service from source, so that Dokploy (and docker compose) can build straight from the repo.
+# The tests run in CI (.github/workflows), not here.
 
-# Steg 1: bygg med Maven
+# Stage 1: build with Maven
 FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml ./
-# Beroenden i ett eget lager, så att de bara laddas ner igen när pom.xml ändras.
+# Dependencies in a separate layer, so they are only downloaded again when pom.xml changes.
 RUN mvn -B -q dependency:go-offline -Dmaven.gitcommitid.skip=true || true
 COPY src ./src
-# git-commit-id kräver .git (som inte skickas med i byggkontexten); formateringen kontrolleras i CI.
+# git-commit-id needs .git, which is not part of the build context. CI checks the formatting.
 RUN mvn -B -q package -DskipTests -Dmaven.gitcommitid.skip=true -Dspotless.check.skip=true \
  && cp target/api-service-activity-feed-*.jar /build/app.jar
 
-# Steg 2: körtidsbild (samma bas som dept44-tjänsterna i Sundsvalls kommun)
+# Stage 2: runtime image (same base as the dept44 services in Sundsvalls kommun)
 FROM eclipse-temurin:25-jre
 WORKDIR /app
-# curl för hälsokontrollen, så att den inte beror på vad basbilden råkar innehålla.
+# curl for the health check, so it does not depend on what the base image happens to contain.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl \
  && rm -rf /var/lib/apt/lists/* \

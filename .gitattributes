@@ -1,2 +1,2 @@
-# Skript som körs i Linux-containrar måste ha LF-radslut
+# Scripts that run in Linux containers must have LF line endings
 *.sh text eol=lf

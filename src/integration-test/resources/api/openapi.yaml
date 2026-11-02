@@ -813,7 +813,7 @@ components:
   securitySchemes:
     ApiKey:
       type: apiKey
-      description: "API-nyckel. Fråge-nycklar (API_KEYS_FRAGA) når /{municipalityId}/kundhandelseFragaSynkron,\
+      description: "API-nyckel. Fråge-nycklar (API_KEYS_QUERY) når /{municipalityId}/kundhandelseFragaSynkron,\
         \ admin-nycklar (API_KEYS_ADMIN) når alla gränssnitt."
       name: X-API-Key
       in: header

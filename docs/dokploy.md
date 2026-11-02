@@ -1,132 +1,132 @@
-# Deploy i Dokploy
+# Deploy in Dokploy
 
-Första versionen körs i [Dokploy](https://docs.dokploy.com) som en **Compose-tjänst**: `docker-compose.yml` bygger
-tjänsten från källkoden (`docker/Dockerfile`) och startar en intern MariaDB i samma stack. Databasen publiceras inte
-utanför stacken; bara tjänsten nås, via Dokploys proxy (Traefik) och HTTPS.
+The first version runs in [Dokploy](https://docs.dokploy.com) as a **Compose service**. `docker-compose.yml` builds
+the service from source (`docker/Dockerfile`) and starts an internal MariaDB in the same stack. The database is not
+published outside the stack. Only the service is reachable, through Dokploy's proxy (Traefik) and HTTPS.
 
 ```
                 Dokploy (Traefik, HTTPS)
                           │
 ┌─────────────────────────┼──────────────────────────────┐
-│ Compose-stack           ▼                              │
+│ Compose stack           ▼                              │
 │   db-prepare ──▶ db (MariaDB 11.4) ◀── app (:8080)     │
 │      │              │                                 │
-│   mariadb-backups  mariadb-data     (namngivna volymer)│
+│   mariadb-backups  mariadb-data         (named volumes)│
 └────────────────────────────────────────────────────────┘
 ```
 
-Vid varje deploy startar tjänsterna i ordningen `db` → `db-prepare` (engångsjobb) → `app`.
+On every deploy the services start in the order `db` → `db-prepare` (one-off job) → `app`.
 
-## Första deploy
+## First deploy
 
-1. **Skapa tjänsten.** I projektet: *Create Service* → *Compose*.
-   - Provider: GitHub (eller Git), repot `Public-Service-as-a-Service/mina-arenden-ref-impl`, branch `main`.
+1. **Create the service.** In the project: *Create Service* → *Compose*.
+   - Provider: GitHub (or Git), the repo `Sundsvallskommun/api-service-activity-feed`, branch `main`.
    - Compose Path: `./docker-compose.yml`.
    - Compose Type: *Docker Compose*.
-2. **Miljövariabler.** Fliken *Environment*, klistra in och fyll i (generera värden på din egen dator):
+2. **Environment variables.** In the *Environment* tab, paste and fill in (generate the values on your own machine):
 
    ```bash
    # openssl rand -hex 24
    DB_PASSWORD=
    DB_ROOT_PASSWORD=
-   # openssl rand -hex 32, se API-nycklar nedan
+   # openssl rand -hex 32, see API keys below
    API_KEYS_ADMIN=
-   API_KEYS_FRAGA=
-   MINA_ARENDEN_MUNICIPALITY_ID=2281
-   MINA_ARENDEN_PRODUCENT=Sundsvalls kommun
-   MINA_ARENDEN_PREFIX=SUNDSVALL
-   MINA_ARENDEN_SEED=false
+   API_KEYS_QUERY=
+   ACTIVITY_FEED_MUNICIPALITY_ID=2281
+   ACTIVITY_FEED_PRODUCER_NAME=Sundsvalls kommun
+   ACTIVITY_FEED_PREFIX=SUNDSVALL
+   ACTIVITY_FEED_SEED=false
    DB_BACKUP_KEEP=10
    ```
 
-   Spara. Dokploy skriver variablerna till en `.env` bredvid compose-filen, och `docker-compose.yml` hämtar dem
-   därifrån. Deployen stoppas med ett tydligt fel om `DB_PASSWORD` saknas, och tjänsten vägrar starta utan en giltig
-   API-nyckel.
+   Save. Dokploy writes the variables to a `.env` next to the compose file, and `docker-compose.yml` reads them from
+   there. The deploy stops with a clear error if `DB_PASSWORD` is missing, and the service refuses to start without a
+   valid API key.
 
-3. **Domän.** Fliken *Domains* → *Add Domain*: Service Name `app`, Host t.ex. `mina-arenden.exempel.se`, Path `/`,
-   Container Port `8080`, HTTPS på med Let's Encrypt. Publicera inga portar i compose-filen; `docker-compose.local.yml`
-   (port 8080 på värden) är bara för lokal körning och används inte av Dokploy.
+3. **Domain.** In the *Domains* tab → *Add Domain*: Service Name `app`, Host e.g. `activity-feed.example.se`, Path `/`,
+   Container Port `8080`, HTTPS on with Let's Encrypt. Do not publish any ports in the compose file.
+   `docker-compose.local.yml` (port 8080 on the host) is only for local use and Dokploy does not use it.
 
-4. **Deploy.** Klicka *Deploy* och följ loggen under *Deployments*. Första bygget tar några minuter (Maven laddar ner
-   beroenden). När `app` är *healthy*:
+4. **Deploy.** Click *Deploy* and follow the log under *Deployments*. The first build takes a few minutes while Maven
+   downloads dependencies. When `app` is *healthy*:
 
    ```bash
-   curl https://mina-arenden.exempel.se/actuator/health
+   curl https://activity-feed.example.se/actuator/health
    # {"groups":["liveness","readiness"],"status":"UP"}
-   curl -H "X-API-Key: <admin-nyckel>" https://mina-arenden.exempel.se/2281/kundhandelser
+   curl -H "X-API-Key: <admin key>" https://activity-feed.example.se/2281/kundhandelser
    # {"antal": 0}
    ```
 
-   I PowerShell (Windows):
+   In PowerShell (Windows):
 
    ```powershell
-   Invoke-RestMethod https://mina-arenden.exempel.se/actuator/health
-   Invoke-RestMethod https://mina-arenden.exempel.se/2281/kundhandelser -Headers @{ "X-API-Key" = "<admin-nyckel>" }
+   Invoke-RestMethod https://activity-feed.example.se/actuator/health
+   Invoke-RestMethod https://activity-feed.example.se/2281/kundhandelser -Headers @{ "X-API-Key" = "<admin key>" }
    ```
 
-   Byt `2281` mot det `MINA_ARENDEN_MUNICIPALITY_ID` som är satt. Startsidan `/` är Swagger UI och kräver ingen
-   nyckel, så den kan inte användas för att testa nyckeln.
+   Replace `2281` with the `ACTIVITY_FEED_MUNICIPALITY_ID` you set. The start page `/` is Swagger UI and needs no key,
+   so you cannot use it to test the key.
 
-   > **PowerShell:** där är `curl` ett alias för `Invoke-WebRequest`, som inte förstår curl-flaggor som `-H` och ger
-   > felet *Cannot bind parameter 'Headers'*. Använd `Invoke-RestMethod` som ovan, eller skriv `curl.exe` för att köra
-   > riktiga curl (följer med Windows 10 och 11). Med `curl.exe` fungerar exemplen i den här guiden oförändrade, utom att
-   > JSON i `-d` behöver andra citattecken; använd därför PowerShell-exemplen när en request har body.
+   > **PowerShell.** There `curl` is an alias for `Invoke-WebRequest`, which does not understand curl flags like `-H`
+   > and fails with *Cannot bind parameter 'Headers'*. Use `Invoke-RestMethod` as above, or type `curl.exe` to run the
+   > real curl (shipped with Windows 10 and 11). With `curl.exe` the examples in this guide work unchanged, except that
+   > JSON in `-d` needs different quotes. Use the PowerShell examples when a request has a body.
 
-5. **Automatisk deploy (valfritt).** Slå på *Autodeploy* i fliken *General* så deployas varje push till `main`.
-   Tjänsten har inget eget webbgränssnitt utöver Swagger UI på `/`.
+5. **Automatic deploy (optional).** Turn on *Autodeploy* in the *General* tab and every push to `main` deploys.
+   The service has no web interface of its own besides Swagger UI on `/`.
 
-## API-nycklar
+## API keys
 
-Alla anrop kräver headern `X-API-Key`, utom `/actuator/health`, `/actuator/info` och dokumentationen (`/`,
+Every request needs the `X-API-Key` header, except `/actuator/health`, `/actuator/info` and the documentation (`/`,
 `/api-docs`, `/swagger-ui/**`).
 
-| Variabel i *Environment* |                           Vem använder nyckeln                            |                                      Får anropa                                       |
-|--------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| `API_KEYS_FRAGA`         | Vidareförmedlingstjänsten (Skatteverket) eller den som ställer frågor     | `POST /{municipalityId}/kundhandelseFragaSynkron`                                     |
-| `API_KEYS_ADMIN`         | Verksamhetssystem/integrationsplattform som läser in kundhändelser, drift | Allt, även `/{municipalityId}/kundhandelser/**`, `/actuator/flyway` och hälsodetaljer |
+| Variable in *Environment* |                             Who uses the key                              |                                             May call                                              |
+|---------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| `API_KEYS_QUERY`          | The forwarding service (Skatteverket) or whoever sends queries            | `POST /{municipalityId}/kundhandelseFragaSynkron`                                                 |
+| `API_KEYS_ADMIN`          | Business system or integration platform that loads activities, operations | Everything, including `/{municipalityId}/kundhandelser/**`, `/actuator/flyway` and health details |
 
-### Skapa och lägga in nycklar
+### Create and add keys
 
-1. Generera en nyckel per klient på din egen dator, aldrig i en delad chatt eller ett ärende:
+1. Generate one key per client on your own machine, never in a shared chat or a ticket:
 
    ```bash
    openssl rand -hex 32
    ```
 
-   I PowerShell (Windows PowerShell 5.1 och PowerShell 7), med kryptografiskt säker slump:
+   In PowerShell (Windows PowerShell 5.1 and PowerShell 7), with cryptographically secure randomness:
 
    ```powershell
    $b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString("x2") })
    ```
 
-   En nyckel ska vara minst 32 tecken utan mellanslag. `openssl rand -hex 32` ger 64 tecken.
+   A key must be at least 32 characters without spaces. `openssl rand -hex 32` gives 64 characters.
 
-2. I Dokploy: fliken *Environment*. Sätt en eller flera nycklar, kommaseparerade utan mellanslag:
+2. In Dokploy, open the *Environment* tab. Set one or more keys, comma-separated without spaces:
 
    ```bash
    API_KEYS_ADMIN=3f9c...e1a0
-   API_KEYS_FRAGA=8b27...44cd,d10e...9f3b
+   API_KEYS_QUERY=8b27...44cd,d10e...9f3b
    ```
 
-   `API_KEYS_ADMIN` måste ha minst en nyckel. `API_KEYS_FRAGA` kan vara tom, men ge hellre vidareförmedlingstjänsten
-   en egen fråge-nyckel än en admin-nyckel: den kan då inte ändra i ärendecachen.
+   `API_KEYS_ADMIN` must have at least one key. `API_KEYS_QUERY` can be empty, but give the forwarding service its own
+   query key rather than an admin key. Then it cannot change the activity cache.
 
-3. *Save* och sedan *Deploy*. Ändrade miljövariabler får effekt först vid nästa deploy. Datat påverkas inte.
+3. *Save* and then *Deploy*. Changed environment variables take effect on the next deploy. The data is not affected.
 
-4. Kontrollera i loggen (fliken *Logs*, tjänsten `app`) att raden
-   `API-nyckelskydd aktivt med 1 admin-nyckel/nycklar och 2 fråge-nyckel/nycklar` finns. Nycklarna själva skrivs aldrig
-   ut; varje anrop loggas med nyckelns position (`apiKeyId`, t.ex. `fraga-2`).
+4. Check in the log (the *Logs* tab, service `app`) that the line
+   `API key protection active with 1 admin key(s) and 2 query key(s)` is there. The keys themselves are never
+   printed. Every request is logged with the key's position (`apiKeyId`, e.g. `query-2`).
 
-5. Lämna över nyckeln till respektive klient på ett säkert sätt. Klienten skickar den i varje anrop:
+5. Hand the key over to each client in a secure way. The client sends it in every request:
 
    ```bash
-   curl https://mina-arenden.exempel.se/2281/kundhandelseFragaSynkron \
-     -H "X-API-Key: <fråge-nyckel>" -H 'Content-Type: application/json' \
+   curl https://activity-feed.example.se/2281/kundhandelseFragaSynkron \
+     -H "X-API-Key: <query key>" -H 'Content-Type: application/json' \
      -H 'skv_client_correlation_id: 0002aa29-49f2-4baf-be51-c7c39c9824b4' \
      -d '{"fraga":{"parter":[{"kund":{"identifierare":"199009090000","typ":"Personnummer"}}]},"anvandare":"199009090000"}'
    ```
 
-   I PowerShell:
+   In PowerShell:
 
    ```powershell
    $body = @{
@@ -134,91 +134,91 @@ Alla anrop kräver headern `X-API-Key`, utom `/actuator/health`, `/actuator/info
      anvandare = "199009090000"
    } | ConvertTo-Json -Depth 10
 
-   Invoke-RestMethod -Method Post -Uri https://mina-arenden.exempel.se/2281/kundhandelseFragaSynkron `
-     -Headers @{ "X-API-Key" = "<fråge-nyckel>"; "skv_client_correlation_id" = "0002aa29-49f2-4baf-be51-c7c39c9824b4" } `
+   Invoke-RestMethod -Method Post -Uri https://activity-feed.example.se/2281/kundhandelseFragaSynkron `
+     -Headers @{ "X-API-Key" = "<query key>"; "skv_client_correlation_id" = "0002aa29-49f2-4baf-be51-c7c39c9824b4" } `
      -ContentType "application/json; charset=utf-8" -Body ([Text.Encoding]::UTF8.GetBytes($body))
    ```
 
-   `-Body` skickas som UTF-8-bytes så att å, ä och ö i rubriker och beskrivningar kommer fram rätt även i Windows
-   PowerShell 5.1. Vid fel kastar `Invoke-RestMethod` ett undantag; statuskoden syns i felmeddelandet.
+   `-Body` is sent as UTF-8 bytes so that å, ä and ö in titles and descriptions arrive intact, also in Windows
+   PowerShell 5.1. On errors `Invoke-RestMethod` throws an exception, and the status code shows in the error message.
 
-   Utan eller med fel nyckel blir svaret `401`; en fråge-nyckel mot `/kundhandelser` ger `403`.
+   Without a key or with a wrong key the response is `401`. A query key against `/kundhandelser` gives `403`.
 
-Om en klient inte kan skicka headern `X-API-Key` kan namnet ändras med `SECURITY_APIKEY_HEADERNAME` (gäller alla
-nycklar).
+If a client cannot send the `X-API-Key` header, `SECURITY_APIKEY_HEADERNAME` changes the name (for all keys).
 
-Nycklar som ska användas i flera Dokploy-tjänster kan läggas som projektvariabler och refereras med
+Keys used in several Dokploy services can be project variables, referenced with
 `API_KEYS_ADMIN=${{project.API_KEYS_ADMIN}}`.
 
-### Byta en nyckel utan avbrott
+### Rotate a key without downtime
 
-1. Lägg till den nya nyckeln bredvid den gamla: `API_KEYS_FRAGA=<gammal>,<ny>`. Deploy.
-2. Byt nyckel hos klienten.
-3. Ta bort den gamla: `API_KEYS_FRAGA=<ny>`. Deploy.
+1. Add the new key next to the old one: `API_KEYS_QUERY=<old>,<new>`. Deploy.
+2. Switch the key at the client.
+3. Remove the old one: `API_KEYS_QUERY=<new>`. Deploy.
 
-Misstänks en nyckel ha läckt: ta bort den direkt och deploya; anrop med den ger `401` så fort den nya containern är
-igång.
+If you suspect a key has leaked, remove it right away and deploy. Requests with it get `401` as soon as the new
+container is up.
 
-## Omdeploy utan att data rensas
+## Redeploy without losing data
 
-Datat ligger i den namngivna volymen `mariadb-data`. Den tas inte bort av *Deploy*, *Redeploy*, *Stop*/*Start*,
-omstart av servern eller en ny version av tjänsten. Så här skyddas datat vid varje deploy:
+The data lives in the named volume `mariadb-data`. *Deploy*, *Redeploy*, *Stop*/*Start*, a server restart or a new
+version of the service does not remove it. This is how each deploy protects the data:
 
-|                                                                          Skydd                                                                           |                Var                |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
-| Volymen `mariadb-data` återanvänds; stacken publicerar ingen databasport                                                                                 | `docker-compose.yml`              |
-| Säkerhetskopia av databasen tas **innan** den nya versionen startar och migrerar schemat. De `DB_BACKUP_KEEP` senaste sparas i volymen `mariadb-backups` | `docker/db-prepare/db-prepare.sh` |
-| `DB_PASSWORD` kan bytas i Dokploy: databasanvändarens lösenord uppdateras vid nästa deploy (MariaDB läser annars bara lösenordet när volymen skapas)     | `db-prepare`                      |
-| Flyway migrerar bara framåt; `clean` är avstängt och redan körda migreringar valideras mot sin checksumma                                                | `application.yml`                 |
-| Hibernate validerar schemat men ändrar det aldrig                                                                                                        | `application.yml`                 |
-| Exempeldata läses bara in om kommunen saknar kundhändelser, och bara med `MINA_ARENDEN_SEED=true`                                                        | `SeedService`                     |
-| Graceful shutdown för tjänsten (30 s) och databasen (60 s) när containrar ersätts                                                                        | `docker-compose.yml`              |
-| `MARIADB_AUTO_UPGRADE` uppgraderar systemtabellerna när MariaDB-imagen får en ny version                                                                 | `docker-compose.yml`              |
+|                                                                          Protection                                                                          |               Where               |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
+| The `mariadb-data` volume is reused. The stack publishes no database port                                                                                    | `docker-compose.yml`              |
+| A database backup is taken **before** the new version starts and migrates the schema. The `DB_BACKUP_KEEP` most recent stay in the `mariadb-backups` volume  | `docker/db-prepare/db-prepare.sh` |
+| `DB_PASSWORD` can change in Dokploy. The database user's password is updated on the next deploy (MariaDB otherwise only reads it when the volume is created) | `db-prepare`                      |
+| Flyway only migrates forward. `clean` is disabled and migrations that already ran are validated against their checksum                                       | `application.yml`                 |
+| Hibernate validates the schema but never changes it                                                                                                          | `application.yml`                 |
+| Sample data loads only if the municipality has no activities, and only with `ACTIVITY_FEED_SEED=true`                                                        | `SeedService`                     |
+| Graceful shutdown for the service (30 s) and the database (60 s) when containers are replaced                                                                | `docker-compose.yml`              |
+| `MARIADB_AUTO_UPGRADE` upgrades the system tables when the MariaDB image gets a new version                                                                  | `docker-compose.yml`              |
 
-Efter varje deploy skriver tjänsten `Ärendecachen innehåller N kundhändelser för kommun 2281` i loggen, och
-`db-prepare` skriver vilken säkerhetskopia som togs. Hela flödet (första deploy, inläsning, omdeploy med ny build och
-bytt `DB_PASSWORD`, kontroll av data och säkerhetskopia) testas i CI med `docker/redeploy-test.sh`.
+After every deploy the service writes `The activity cache contains N activities for municipality 2281` to the log,
+and `db-prepare` writes which backup it took. CI tests the whole flow with `docker/redeploy-test.sh`: first deploy,
+loading data, a redeploy with a new build and a changed `DB_PASSWORD`, and a check of the data and the backup.
 
-**Det här tar bort datat:**
+**This removes the data:**
 
-- *Delete* av tjänsten med *Delete volumes* ikryssat, eller `docker compose down -v` på servern.
-- Ändringar som byter compose-projektets namn efter första deploy, t.ex. tjänstens *App Name* eller inställningen
-  *Isolated Deployment*: volymnamnet bygger på projektnamnet (`<projekt>_mariadb-data`), så stacken får då nya, tomma
-  volymer. De gamla finns kvar på servern (`docker volume ls`) men används inte. Kontrollera volymnamnen före en sådan
-  ändring.
-- Byte av `DB_ROOT_PASSWORD` efter första deploy gör att `db-prepare` inte kan logga in och deployen stoppas (datat
-  finns kvar). Sätt tillbaka det gamla värdet.
+- *Delete* of the service with *Delete volumes* checked, or `docker compose down -v` on the server.
+- Changes that rename the compose project after the first deploy, e.g. the service's *App Name* or the
+  *Isolated Deployment* setting. The volume name is built from the project name (`<project>_mariadb-data`), so the
+  stack then gets new, empty volumes. The old ones stay on the server (`docker volume ls`) but are not used. Check the
+  volume names before such a change.
+- Changing `DB_ROOT_PASSWORD` after the first deploy means `db-prepare` cannot log in and the deploy stops. The data
+  is still there. Set the old value back.
 
-## Säkerhetskopior och återställning
+## Backups and restore
 
-Säkerhetskopiorna (`minaarenden-ÅÅÅÅMMDDTHHMMSSZ.sql.gz`) ligger i volymen `mariadb-backups` på Dokploy-servern. För
-kopior utanför servern: använd Dokploys *Volume Backups* (i de versioner som har funktionen) för volymen
-`mariadb-backups` mot en S3-destination, eller kopiera filerna med egna verktyg.
+The backups (`activityfeed-YYYYMMDDTHHMMSSZ.sql.gz`) are in the `mariadb-backups` volume on the Dokploy server. For
+copies outside the server, use Dokploy's *Volume Backups* (in the versions that have the feature) for the
+`mariadb-backups` volume against an S3 destination, or copy the files with your own tools.
 
-Kommandona nedan körs på Dokploy-servern i katalogen där Dokploy har checkat ut stacken (normalt
-`/etc/dokploy/compose/<app-name>/code`, där både compose-filen och `.env` finns). Lista säkerhetskopiorna:
+Run the commands below on the Dokploy server in the directory where Dokploy checked out the stack (normally
+`/etc/dokploy/compose/<app-name>/code`, which holds both the compose file and `.env`). List the backups:
 
 ```bash
 docker compose -p <app-name> run --rm --no-deps --entrypoint sh db-prepare -c 'ls -lh /backups'
 ```
 
-Återställa en säkerhetskopia:
+Restore a backup:
 
-1. Stoppa tjänsten `app` så att inga skrivningar sker: `docker compose -p <app-name> stop app`.
-2. Läs in kopian (ersätter databasens innehåll):
+1. Stop the `app` service so that nothing writes: `docker compose -p <app-name> stop app`.
+2. Load the backup (replaces the database content):
 
    ```bash
    docker compose -p <app-name> run --rm --no-deps --entrypoint sh db-prepare -c \
-     'gunzip -c /backups/minaarenden-20261001T120000Z.sql.gz | MYSQL_PWD="$DB_ROOT_PASSWORD" mariadb --host=db --user=root'
+     'gunzip -c /backups/activityfeed-20261001T120000Z.sql.gz | MYSQL_PWD="$DB_ROOT_PASSWORD" mariadb --host=db --user=root'
    ```
-3. Starta `app` igen (`docker compose -p <app-name> start app`, eller *Deploy* i Dokploy). Går man tillbaka till en
-   äldre version av tjänsten ska kopian vara tagen före den nyare versionens migreringar, annars stoppar Flyway starten.
+3. Start `app` again (`docker compose -p <app-name> start app`, or *Deploy* in Dokploy). If you go back to an older
+   version of the service, the backup must be from before the newer version's migrations, otherwise Flyway stops the
+   startup.
 
-`<app-name>` är tjänstens *App Name* i Dokploy (projektnamnet för compose-stacken).
+`<app-name>` is the service's *App Name* in Dokploy (the project name of the compose stack).
 
-## Alternativ: Application med Dokploys databas
+## Alternative: Application with Dokploy's database
 
-Tjänsten kan också köras som *Application* (Build Type *Dockerfile*, Docker File `docker/Dockerfile`, Build Path `/`)
-mot en MariaDB-tjänst som skapas i Dokploy (*Create Service* → *Database* → *MariaDB*). Sätt då `DB_URL`
-(`jdbc:mariadb://<databasens interna värdnamn>:3306/<databas>`), `DB_USER`, `DB_PASSWORD` och API-nycklarna under
-*Environment*, och använd Dokploys inbyggda databasbackuper. `db-prepare` används inte i det läget.
+The service can also run as an *Application* (Build Type *Dockerfile*, Docker File `docker/Dockerfile`, Build Path `/`)
+against a MariaDB service created in Dokploy (*Create Service* → *Database* → *MariaDB*). Then set `DB_URL`
+(`jdbc:mariadb://<the database's internal host name>:3306/<database>`), `DB_USER`, `DB_PASSWORD` and the API keys
+under *Environment*, and use Dokploy's built-in database backups. `db-prepare` is not used in that setup.

@@ -1,2 +1,2 @@
 org.springframework.boot.EnvironmentPostProcessor=\
-se.sundsvall.minaarenden.configuration.SakerhetsinstallningarEnvironmentPostProcessor
+se.sundsvall.activityfeed.configuration.SecurityDefaultsEnvironmentPostProcessor

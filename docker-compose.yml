@@ -1,10 +1,10 @@
-# Tjänsten med intern MariaDB, för Dokploy (Compose-tjänst) och lokalt.
+# The service with an internal MariaDB, for Dokploy (Compose service) and local use.
 #
-# Datat ligger i volymen mariadb-data och överlever omdeploy, omstart och ny version. Vid varje deploy körs först
-# db-prepare, som tar en säkerhetskopia (volymen mariadb-backups) och synkar databaslösenordet, innan app startar
-# och Flyway migrerar schemat framåt. Databasen publiceras inte utanför Compose-nätverket.
+# The data lives in the mariadb-data volume and survives redeploys, restarts and new versions. On every deploy
+# db-prepare runs first. It takes a backup (the mariadb-backups volume) and syncs the database password before app
+# starts and Flyway migrates the schema forward. The database is not published outside the Compose network.
 #
-# Ta aldrig bort volymerna (docker compose down -v, eller "Delete volumes" i Dokploy) om datat ska finnas kvar.
+# Never remove the volumes (docker compose down -v, or "Delete volumes" in Dokploy) if the data must be kept.
 services:
   app:
     build:
@@ -14,35 +14,35 @@ services:
     expose:
       - "8080"
     environment:
-      DB_URL: jdbc:mariadb://db:3306/minaarenden
-      DB_USER: minaarenden
-      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD måste sättas}
-      API_KEYS_FRAGA: ${API_KEYS_FRAGA:-}
-      # Utan giltig nyckel vägrar tjänsten starta (se README). ADMIN_API_KEY läses för att äldre deployer ska fungera.
+      DB_URL: jdbc:mariadb://db:3306/activityfeed
+      DB_USER: activityfeed
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
+      API_KEYS_QUERY: ${API_KEYS_QUERY:-}
+      # Without a valid key the service refuses to start (see README). ADMIN_API_KEY is read so that older deploys keep working.
       API_KEYS_ADMIN: ${API_KEYS_ADMIN:-${ADMIN_API_KEY:-}}
-      MINA_ARENDEN_MUNICIPALITY_ID: ${MINA_ARENDEN_MUNICIPALITY_ID:-2281}
-      MINA_ARENDEN_PRODUCENT: ${MINA_ARENDEN_PRODUCENT:-Referenskommunen}
-      MINA_ARENDEN_PREFIX: ${MINA_ARENDEN_PREFIX:-REFKOM}
-      MINA_ARENDEN_STANDARD_VERSION: ${MINA_ARENDEN_STANDARD_VERSION:-6.1}
-      MINA_ARENDEN_SEED: ${MINA_ARENDEN_SEED:-false}
+      ACTIVITY_FEED_MUNICIPALITY_ID: ${ACTIVITY_FEED_MUNICIPALITY_ID:-2281}
+      ACTIVITY_FEED_PRODUCER_NAME: ${ACTIVITY_FEED_PRODUCER_NAME:-Referenskommunen}
+      ACTIVITY_FEED_PREFIX: ${ACTIVITY_FEED_PREFIX:-REFKOM}
+      ACTIVITY_FEED_STANDARD_VERSION: ${ACTIVITY_FEED_STANDARD_VERSION:-6.1}
+      ACTIVITY_FEED_SEED: ${ACTIVITY_FEED_SEED:-false}
       TZ: Europe/Stockholm
     depends_on:
       db:
         condition: service_healthy
       db-prepare:
         condition: service_completed_successfully
-    # Pågående anrop hinner avslutas (graceful shutdown) innan containern ersätts.
+    # Gives ongoing requests time to finish (graceful shutdown) before the container is replaced.
     stop_grace_period: 30s
 
   db:
     image: mariadb:11.4
     restart: unless-stopped
     environment:
-      MARIADB_DATABASE: minaarenden
-      MARIADB_USER: minaarenden
-      # Läses bara när volymen initieras (första deploy). Byte av DB_PASSWORD därefter hanteras av db-prepare.
-      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD måste sättas}
-      # Som i tidigare versioner: utan DB_ROOT_PASSWORD blir root-lösenordet samma som DB_PASSWORD.
+      MARIADB_DATABASE: activityfeed
+      MARIADB_USER: activityfeed
+      # Only read when the volume is initialised (first deploy). db-prepare handles later changes of DB_PASSWORD.
+      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
+      # As in earlier versions: without DB_ROOT_PASSWORD the root password is the same as DB_PASSWORD.
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
       MARIADB_AUTO_UPGRADE: "1"
       TZ: UTC
@@ -54,7 +54,7 @@ services:
       timeout: 5s
       retries: 12
       start_period: 30s
-    # InnoDB får stänga ner i lugn och ro vid omdeploy.
+    # Gives InnoDB time to shut down cleanly on redeploy.
     stop_grace_period: 60s
 
   db-prepare:
@@ -63,9 +63,9 @@ services:
     restart: "no"
     environment:
       DB_HOST: db
-      DB_NAME: minaarenden
-      DB_USER: minaarenden
-      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD måste sättas}
+      DB_NAME: activityfeed
+      DB_USER: activityfeed
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
       DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
       DB_BACKUP_KEEP: ${DB_BACKUP_KEEP:-10}
     volumes:

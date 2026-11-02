@@ -1,54 +1,54 @@
 #!/bin/bash
-# Körs som engångstjänst (db-prepare) vid varje deploy, efter att databasen är uppe och innan applikationen startar.
+# Runs as a one-off service (db-prepare) on every deploy, after the database is up and before the application starts.
 #
-# 1. Säkerhetskopierar databasen till volymen mariadb-backups (om den innehåller tabeller), så att en omdeploy med
-#    en ny version, inklusive nya Flyway-migreringar, alltid kan rullas tillbaka.
-# 2. Rensar bort gamla säkerhetskopior så att högst DB_BACKUP_KEEP finns kvar.
-# 3. Sätter lösenordet för applikationens databasanvändare till DB_PASSWORD. MariaDB-imagen läser MARIADB_PASSWORD
-#    bara när volymen initieras första gången; utan det här steget skulle ett bytt DB_PASSWORD i Dokploy låsa ute
-#    applikationen efter nästa deploy.
+# 1. Backs up the database to the mariadb-backups volume (if it contains tables), so that a redeploy with a new
+#    version, including new Flyway migrations, can always be rolled back.
+# 2. Removes old backups so that at most DB_BACKUP_KEEP remain.
+# 3. Sets the password of the application's database user to DB_PASSWORD. The MariaDB image only reads
+#    MARIADB_PASSWORD when the volume is initialised the first time. Without this step, a changed DB_PASSWORD in
+#    Dokploy would lock the application out after the next deploy.
 #
-# Datat i databasen ändras aldrig av det här skriptet.
+# This script never changes the data in the database.
 set -euo pipefail
 
 : "${DB_HOST:=db}"
-: "${DB_NAME:=minaarenden}"
-: "${DB_USER:=minaarenden}"
+: "${DB_NAME:=activityfeed}"
+: "${DB_USER:=activityfeed}"
 : "${DB_BACKUP_DIR:=/backups}"
 : "${DB_BACKUP_KEEP:=10}"
-: "${DB_PASSWORD:?DB_PASSWORD måste vara satt}"
-: "${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD måste vara satt}"
+: "${DB_PASSWORD:?DB_PASSWORD must be set}"
+: "${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD must be set}"
 
 export MYSQL_PWD="${DB_ROOT_PASSWORD}"
-klient=(mariadb --host="${DB_HOST}" --user=root --batch --skip-column-names)
+client=(mariadb --host="${DB_HOST}" --user=root --batch --skip-column-names)
 
-for forsok in $(seq 1 30); do
-	if "${klient[@]}" -e "SELECT 1" >/dev/null 2>&1; then
+for attempt in $(seq 1 30); do
+	if "${client[@]}" -e "SELECT 1" >/dev/null 2>&1; then
 		break
 	fi
-	if [ "${forsok}" -eq 30 ]; then
-		echo "db-prepare: kan inte ansluta till ${DB_HOST} som root. Har DB_ROOT_PASSWORD ändrats efter första deploy?" >&2
+	if [ "${attempt}" -eq 30 ]; then
+		echo "db-prepare: cannot connect to ${DB_HOST} as root. Has DB_ROOT_PASSWORD changed after the first deploy?" >&2
 		exit 1
 	fi
 	sleep 2
 done
 
-antal_tabeller=$("${klient[@]}" -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '${DB_NAME}'")
-if [ "${antal_tabeller}" -gt 0 ]; then
+table_count=$("${client[@]}" -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '${DB_NAME}'")
+if [ "${table_count}" -gt 0 ]; then
 	mkdir -p "${DB_BACKUP_DIR}"
-	fil="${DB_BACKUP_DIR}/${DB_NAME}-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
-	mariadb-dump --host="${DB_HOST}" --user=root --single-transaction --routines --triggers --databases "${DB_NAME}" | gzip > "${fil}.tmp"
-	mv "${fil}.tmp" "${fil}"
-	echo "db-prepare: säkerhetskopia sparad: ${fil} ($(du -h "${fil}" | cut -f1))"
-	# Behåll de DB_BACKUP_KEEP senaste säkerhetskopiorna.
+	file="${DB_BACKUP_DIR}/${DB_NAME}-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
+	mariadb-dump --host="${DB_HOST}" --user=root --single-transaction --routines --triggers --databases "${DB_NAME}" | gzip > "${file}.tmp"
+	mv "${file}.tmp" "${file}"
+	echo "db-prepare: backup saved: ${file} ($(du -h "${file}" | cut -f1))"
+	# Keep the DB_BACKUP_KEEP most recent backups.
 	ls -1t "${DB_BACKUP_DIR}/${DB_NAME}-"*.sql.gz 2>/dev/null | tail -n +"$((DB_BACKUP_KEEP + 1))" | xargs -r rm -f --
 else
-	echo "db-prepare: databasen ${DB_NAME} är tom (första deploy), ingen säkerhetskopia behövs"
+	echo "db-prepare: database ${DB_NAME} is empty (first deploy), no backup needed"
 fi
 
-losenord=${DB_PASSWORD//\\/\\\\}
-losenord=${losenord//\'/\\\'}
-"${klient[@]}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${losenord}';
-ALTER USER '${DB_USER}'@'%' IDENTIFIED BY '${losenord}';
+password=${DB_PASSWORD//\\/\\\\}
+password=${password//\'/\\\'}
+"${client[@]}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${password}';
+ALTER USER '${DB_USER}'@'%' IDENTIFIED BY '${password}';
 GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'%';"
-echo "db-prepare: databasanvändaren ${DB_USER} är uppdaterad"
+echo "db-prepare: database user ${DB_USER} is updated"

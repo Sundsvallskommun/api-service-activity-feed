@@ -1,4 +1,4 @@
-# Lokalt: publicera tjänsten på http://localhost:8080. I Dokploy används Domains i stället.
+# Local use: publishes the service on http://localhost:8080. Dokploy uses Domains instead.
 #   docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
 services:
   app:

@@ -1,24 +1,24 @@
-# Mina ärenden
+# Activity feed
 
-_Producent enligt [Mina ärendens standard för samlad ärendeåterkoppling](https://www.digg.se/digitala-tjanster/mina-arenden---arendeaterkoppling-fran-det-offentliga),
-med en ärendecache i MariaDB. Byggd som Sundsvalls kommuns api-service-tjänster (dept44, Maven, Java 25) och tänkt som
-utgångspunkt för en kommun som vill lämna kundhändelser till Mina ärenden._
+_A producer for [Mina ärenden, the standard for consolidated case feedback](https://www.digg.se/digitala-tjanster/mina-arenden---arendeaterkoppling-fran-det-offentliga),
+with an activity cache in MariaDB. Built like Sundsvalls kommun's api-service services (dept44, Maven, Java 25) and
+meant as a starting point for a municipality that wants to deliver customer events (kundhändelser) to Mina ärenden._
 
 ```
-Verksamhetssystem ──POST /{municipalityId}/kundhandelser──▶ Ärendecache (MariaDB)
-                                                                 │
-Vidareförmedlingstjänsten (Skatteverket) ──POST /{municipalityId}/kundhandelseFragaSynkron──▶ kundhändelser
+Business system ──POST /{municipalityId}/kundhandelser──▶ Activity cache (MariaDB)
+                                                               │
+Forwarding service (Skatteverket) ──POST /{municipalityId}/kundhandelseFragaSynkron──▶ kundhändelser
 ```
 
-- **Frågegränssnitt:** `POST /{municipalityId}/kundhandelseFragaSynkron` med samma request, response och felformat
-  (`{"message": "..."}`) som Skatteverkets API *Mina ärenden kundhändelser* (RAML `mina-arenden-kundhandelser` 1.0.0).
-  Parter (kund, ärende eller båda), kundhändelsetyper med prefixmatchning, taggar, datumintervall, sortering och
-  paginering.
-- **Ärendecache:** `POST|GET|DELETE /{municipalityId}/kundhandelser` för verksamhetssystemet. Felsvar enligt RFC 9457
-  (dept44 `Problem`).
-- **Säkerhet:** alla anrop kräver API-nyckel i headern `X-API-Key` (se [Säkerhet](#säkerhet)).
-- **Drift:** container med hälsokontroll, `docker-compose.yml` med intern MariaDB, säkerhetskopia vid varje
-  omdeploy och Flyway-migreringar som aldrig tömmer databasen. Se [docs/dokploy.md](docs/dokploy.md).
+- **Query interface.** `POST /{municipalityId}/kundhandelseFragaSynkron` uses the same request, response and error
+  format (`{"message": "..."}`) as Skatteverket's API *Mina ärenden kundhändelser* (RAML `mina-arenden-kundhandelser`
+  1.0.0). It supports parties (customer, errand or both), activity types with prefix matching, tags, date ranges,
+  sorting and pagination.
+- **Activity cache.** `POST|GET|DELETE /{municipalityId}/kundhandelser` for the business system. Errors follow
+  RFC 9457 (dept44 `Problem`).
+- **Security.** Every request needs an API key in the `X-API-Key` header (see [Security](#security)).
+- **Operations.** A container with a health check, `docker-compose.yml` with an internal MariaDB, a backup on every
+  redeploy, and Flyway migrations that never empty the database. See [docs/dokploy.md](docs/dokploy.md).
 
 ## Getting Started
 
@@ -26,79 +26,81 @@ Vidareförmedlingstjänsten (Skatteverket) ──POST /{municipalityId}/kundhand
 
 - **Java 25**
 - **Maven 3.9.9+**
-- **Docker** (Testcontainers i testerna, och för att köra med Docker Compose)
-- **MariaDB** (följer med i Docker Compose)
+- **Docker** (Testcontainers in the tests, and for running with Docker Compose)
+- **MariaDB** (included in Docker Compose)
 - **Git**
 
 ### Installation
 
-1. **Klona repot:**
+1. **Clone the repo:**
 
 ```bash
-git clone https://github.com/Public-Service-as-a-Service/mina-arenden-ref-impl.git
-cd mina-arenden-ref-impl
+git clone https://github.com/Sundsvallskommun/api-service-activity-feed.git
+cd api-service-activity-feed
 ```
 
-2. **Konfigurera tjänsten.** Se [Configuration](#configuration). Utan minst en API-nyckel startar tjänsten inte.
+2. **Configure the service.** See [Configuration](#configuration). The service does not start without at least one
+   API key.
 
-3. **Bygg och kör.**
+3. **Build and run.**
 
-Med Docker Compose (bygger tjänsten och startar MariaDB):
+With Docker Compose, which builds the service and starts MariaDB:
 
 ```bash
-cp .env.example .env        # sätt DB_PASSWORD, DB_ROOT_PASSWORD och API_KEYS_ADMIN (openssl rand -hex 32)
+cp .env.example .env        # set DB_PASSWORD, DB_ROOT_PASSWORD and API_KEYS_ADMIN (openssl rand -hex 32)
 docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
 ```
 
-Med Maven mot en egen MariaDB:
+With Maven against your own MariaDB:
 
 ```bash
-export DB_URL=jdbc:mariadb://localhost:3306/minaarenden DB_USER=minaarenden DB_PASSWORD=hemligt
-export API_KEYS_ADMIN=$(openssl rand -hex 32) MINA_ARENDEN_SEED=true
+export DB_URL=jdbc:mariadb://localhost:3306/activityfeed DB_USER=activityfeed DB_PASSWORD=secret
+export API_KEYS_ADMIN=$(openssl rand -hex 32) ACTIVITY_FEED_SEED=true
 mvn spring-boot:run
 ```
 
-Med `MINA_ARENDEN_SEED=true` läses fem exempelhändelser in vid första start
-(`src/main/resources/exempel-kundhandelser.json`), så att frågor kan provas direkt.
+With `ACTIVITY_FEED_SEED=true` the service loads five sample activities on first start
+(`src/main/resources/sample-activities.json`), so you can try queries right away.
 
-Fler testdata, 49 kundhändelser för privatpersoner och företag i en rad olika ärendetyper, läses in via API:t med
-`API_KEYS_ADMIN=<nyckel> ./tools/testdata/las-in.sh [bas-url] [kommun-id] [prefix]`. Kunderna har Skatteverkets
-testpersonnummer.
+More test data, 49 activities for individuals and companies across many errand types, loads through the API with
+`API_KEYS_ADMIN=<key> ./tools/testdata/load.sh [base-url] [municipality-id] [prefix]`. The customers have
+Skatteverket's test personal identity numbers.
 
-### Tester
+### Tests
 
 ```bash
 mvn verify
 ```
 
-Enhetstester (`src/test`) och applikationstester (`src/integration-test`, `*IT`) körs mot MariaDB 11.4 via
-Testcontainers, så Docker måste finnas. `mvn verify` kontrollerar också formateringen (`mvn dept44-formatting:apply`
-rättar den) och täckningsgraden (JaCoCo, dept44-standard). `docker/redeploy-test.sh` bygger containern, gör en
-omdeploy och kontrollerar att datat finns kvar; det körs i CI (`.github/workflows/docker_ci.yml`).
+Unit tests (`src/test`) and application tests (`src/integration-test`, `*IT`) run against MariaDB 11.4 through
+Testcontainers, so Docker must be available. `mvn verify` also checks the formatting (`mvn dept44-formatting:apply`
+fixes it) and the coverage (JaCoCo, dept44 standard). `docker/redeploy-test.sh` builds the container, does a
+redeploy and checks that the data is still there. CI runs it (`.github/workflows/docker_ci.yml`).
 
 ## Dependencies
 
-Tjänsten har inga beroenden till andra tjänster. Den anropas av vidareförmedlingstjänsten (fråga) och av
-verksamhetssystem (inläsning).
+The service calls no other services. The forwarding service (vidareförmedlingstjänsten) calls it with queries, and
+business systems call it to load activities.
 
 ## API Documentation
 
-- **Swagger UI:** [http://localhost:8080/](http://localhost:8080/) (även `/swagger-ui/index.html`). Knappen
-  *Authorize* tar API-nyckeln.
-- **OpenAPI:** [http://localhost:8080/api-docs](http://localhost:8080/api-docs). Den incheckade specifikationen
-  (`src/integration-test/resources/api/openapi.yaml`) jämförs med tjänstens i `OpenApiSpecificationIT`.
+- **Swagger UI:** [http://localhost:8080/](http://localhost:8080/) (also `/swagger-ui/index.html`). The *Authorize*
+  button takes the API key.
+- **OpenAPI:** [http://localhost:8080/api-docs](http://localhost:8080/api-docs). `OpenApiSpecificationIT` compares
+  the service's spec with the checked-in one (`src/integration-test/resources/api/openapi.yaml`).
 
 ## Usage
 
-Alla sökvägar börjar med kommun-id (`2281` = Sundsvall), enligt dept44-konventionen. Kommunen måste vara konfigurerad
-som producent, annars blir svaret 404. Vidareförmedlingstjänsten konfigureras med bas-URL:en
-`https://<värd>/<kommun-id>`, så blir operationen `/kundhandelseFragaSynkron` som i Skatteverkets API-definition.
+Every path starts with the municipality id (`2281` = Sundsvall), following the dept44 convention. The municipality
+must be configured as a producer, otherwise the response is 404. Configure the forwarding service with the base URL
+`https://<host>/<municipality-id>`, so the operation becomes `/kundhandelseFragaSynkron` as in Skatteverket's API
+definition.
 
-### Fråga om kundhändelser
+### Query activities
 
 ```bash
 curl -s http://localhost:8080/2281/kundhandelseFragaSynkron \
-  -H "X-API-Key: $API_KEYS_FRAGA" \
+  -H "X-API-Key: $API_KEYS_QUERY" \
   -H 'Content-Type: application/json' \
   -H 'skv_client_correlation_id: 0002aa29-49f2-4baf-be51-c7c39c9824b4' \
   -H 'Accept-Language: sv' \
@@ -114,25 +116,26 @@ curl -s http://localhost:8080/2281/kundhandelseFragaSynkron \
   }'
 ```
 
-Svaret följer specifikationen: `kundhandelser` per part med `totaltAntalKundhandelser` och `kundhandelserForPart`,
-`metadata` som ekar frågan, och `delfragor` med en rad per part (`producent`, `status`, `httpCode`). Som ensam
-producent svarar tjänsten alltid `200`; vidareförmedlingstjänsten sätter `206` när någon producent fallerar.
+The response follows the specification. It has `kundhandelser` per party with `totaltAntalKundhandelser` and
+`kundhandelserForPart`, `metadata` that echoes the query, and `delfragor` with one row per party (`producent`,
+`status`, `httpCode`). As the only producer the service always answers `200`. The forwarding service sets `206` when
+a producer fails.
 
-|            Fält            |                                   Beteende                                    |
-|----------------------------|-------------------------------------------------------------------------------|
-| `parter[].kund` + `arende` | Båda måste stämma om båda anges                                               |
-| `kundhandelseTyper`        | `REFKOM.BYGGLOV` matchar `REFKOM.BYGGLOV` och allt under (`REFKOM.BYGGLOV.*`) |
-| `taggar`                   | Minst en tagg ska finnas på händelsen                                         |
-| `startDatum`, `slutDatum`  | Inklusive, kl. 00:00 till 23:59:59.999 svensk tid                             |
-| `behandling.sortering`     | Flera attribut i prioritetsordning; utan sortering nyast först                |
-| `behandling.paginering`    | Kräver sortering; `totaltAntalKundhandelser` anger antal före paginering      |
-| Fel                        | `{"message": "..."}` med 400, 401, 404, 405, 409, 415 eller 500               |
+|           Field            |                                        Behavior                                        |
+|----------------------------|----------------------------------------------------------------------------------------|
+| `parter[].kund` + `arende` | Both must match if both are given                                                      |
+| `kundhandelseTyper`        | `REFKOM.BYGGLOV` matches `REFKOM.BYGGLOV` and everything below it (`REFKOM.BYGGLOV.*`) |
+| `taggar`                   | At least one of the tags must be on the activity                                       |
+| `startDatum`, `slutDatum`  | Inclusive, 00:00 to 23:59:59.999 Swedish time                                          |
+| `behandling.sortering`     | Several attributes in priority order. Without sorting, newest first                    |
+| `behandling.paginering`    | Requires sorting. `totaltAntalKundhandelser` gives the count before pagination         |
+| Errors                     | `{"message": "..."}` with 400, 401, 404, 405, 409, 415 or 500                          |
 
-Obligatorisk header: `skv_client_correlation_id` (icke-tom sträng med skrivbara tecken, högst 200). Värdet läggs i
-MDC som `skvClientCorrelationId` bredvid dept44:s `x-request-id`. Gränser per anrop (`Granser.java`): högst 100 parter,
-100 kundhändelsetyper, 100 taggar och `paginering.limit` högst 1000.
+Required header: `skv_client_correlation_id`, a non-empty string of printable characters, at most 200. The service
+puts the value in the MDC as `skvClientCorrelationId` next to dept44's `x-request-id`. Limits per request
+(`Limits.java`): at most 100 parties, 100 activity types, 100 tags, and `paginering.limit` at most 1000.
 
-### Läsa in kundhändelser i cachen
+### Load activities into the cache
 
 ```bash
 curl -s http://localhost:8080/2281/kundhandelser -H "X-API-Key: $API_KEYS_ADMIN" -H 'Content-Type: application/json' -d '[{
@@ -150,101 +153,102 @@ curl -s http://localhost:8080/2281/kundhandelser -H "X-API-Key: $API_KEYS_ADMIN"
 }]'
 ```
 
-Svar `201` med `{"antal": 1}`. Samma `kundhandelseId` inom kommunen ersätter befintlig post. `producent`, `sprak`
-(`sv`) och `version` fylls i från konfigurationen om de utelämnas. `kundhandelseTyp` ska ha minst tre delar och börja
-med kommunens prefix. Högst 1000 händelser per anrop, som sparas i en transaktion; vid 409 (samtidig inläsning av
-samma nya id) kan anropet skickas om oförändrat. `tidpunkt` tas emot som RFC 3339 eller lokal tid
-`ÅÅÅÅ-MM-DD HH:MM:SS` och lämnas alltid ut som RFC 3339 med svensk tidszon.
+The response is `201` with `{"antal": 1}`. The same `kundhandelseId` within the municipality replaces the existing
+record. The service fills in `producent`, `sprak` (`sv`) and `version` from the configuration if they are left out.
+`kundhandelseTyp` must have at least three parts and start with the municipality's prefix. At most 1000 activities per
+request, saved in one transaction. On 409 (a concurrent load of the same new id) the request can be sent again
+unchanged. `tidpunkt` is accepted as RFC 3339 or local time `YYYY-MM-DD HH:MM:SS` and is always returned as RFC 3339
+with the Swedish time zone.
 
-Dessutom `GET /{municipalityId}/kundhandelser/{kundhandelseId}`, `DELETE /{municipalityId}/kundhandelser/{kundhandelseId}`
-och `GET /{municipalityId}/kundhandelser` (antal).
+There are also `GET /{municipalityId}/kundhandelser/{kundhandelseId}`,
+`DELETE /{municipalityId}/kundhandelser/{kundhandelseId}` and `GET /{municipalityId}/kundhandelser` (count).
 
-## Säkerhet
+## Security
 
-Alla anrop kräver en API-nyckel i headern `X-API-Key`, utom dokumentationen (`/`, `/api-docs`, Swagger UI) och
+Every request needs an API key in the `X-API-Key` header, except the documentation (`/`, `/api-docs`, Swagger UI) and
 `/actuator/health`, `/actuator/info`.
 
-|    Nyckel    |  Miljövariabel   |                          Får anropa                          |
-|--------------|------------------|--------------------------------------------------------------|
-| Fråge-nyckel | `API_KEYS_FRAGA` | `/{municipalityId}/kundhandelseFragaSynkron`                 |
-| Admin-nyckel | `API_KEYS_ADMIN` | Allt: fråga, ärendecachen, `/actuator/flyway`, hälsodetaljer |
+|    Key    | Environment variable |                                  May call                                   |
+|-----------|----------------------|-----------------------------------------------------------------------------|
+| Query key | `API_KEYS_QUERY`     | `/{municipalityId}/kundhandelseFragaSynkron`                                |
+| Admin key | `API_KEYS_ADMIN`     | Everything: queries, the activity cache, `/actuator/flyway`, health details |
 
-- Båda är kommaseparerade listor, så att en ny nyckel kan läggas till innan den gamla tas bort.
-- Varje nyckel ska vara minst 32 tecken (`openssl rand -hex 32` ger 64). Utan någon giltig nyckel startar tjänsten
-  inte; skyddet kan inte stängas av.
-- Saknad eller fel nyckel ger `401`, fråge-nyckel mot ärendecachen ger `403`. Frågegränssnittet svarar i Skatteverkets
-  format (`{"message":"Unauthorized"}`), övriga med RFC 9457.
-- Nycklarna hålls bara som SHA-256-hashar i minnet och jämförs i konstant tid. I loggen och MDC (`apiKeyId`) syns
-  bara nyckelns position, t.ex. `admin-1` eller `fraga-2`.
-- Headerns namn kan ändras med `SECURITY_APIKEY_HEADERNAME`.
+- Both are comma-separated lists, so a new key can be added before the old one is removed.
+- Each key must be at least 32 characters (`openssl rand -hex 32` gives 64). Without a valid key the service does not
+  start. The protection cannot be turned off.
+- A missing or wrong key gives `401`, and a query key against the activity cache gives `403`. The query interface
+  answers in Skatteverket's format (`{"message":"Unauthorized"}`), the other interfaces with RFC 9457.
+- The service keeps the keys only as SHA-256 hashes in memory and compares them in constant time. Logs and the MDC
+  (`apiKeyId`) show only the key's position, e.g. `admin-1` or `query-2`.
+- `SECURITY_APIKEY_HEADERNAME` changes the header name.
 
-Hur nycklarna sätts och byts i Dokploy beskrivs i [docs/dokploy.md](docs/dokploy.md#api-nycklar).
+[docs/dokploy.md](docs/dokploy.md#api-keys) describes how to set and rotate the keys in Dokploy.
 
-dept44:s standardvärden loggar annars anropens innehåll (inklusive headern med API-nyckeln), exponerar alla
-actuator-endpoints och visar hälsodetaljer för alla. De går före tjänstens `application.yml`, så
-`SakerhetsinstallningarEnvironmentPostProcessor` lägger tjänstens värden ovanför konfigurationsfilerna: ingen
-payload-loggning, bara `health`, `info` och `flyway` exponeras, och hälsodetaljer kräver admin-nyckel. Miljövariabler
-går fortfarande före, t.ex. `LOGGING_LEVEL_SE_SUNDSVALL_DEPT44_PAYLOAD=TRACE` vid lokal felsökning; då loggas
-headrarna, alltså API-nyckeln, men personnummer maskeras av `logbook.body-filters`. Personnummer loggas aldrig av
-tjänsten själv och maskeras i `toString()` (dept44 `PiiMasker`).
+dept44's defaults log request payloads (including the header with the API key), expose every actuator endpoint and
+show health details to everyone. They take precedence over the service's `application.yml`, so
+`SecurityDefaultsEnvironmentPostProcessor` puts the service's values above the configuration files. That means no
+payload logging, only `health`, `info` and `flyway` exposed, and health details only with an admin key. Environment
+variables still take precedence, e.g. `LOGGING_LEVEL_SE_SUNDSVALL_DEPT44_PAYLOAD=TRACE` for local debugging. The
+headers, and so the API key, are then logged, but `logbook.body-filters` masks personal identity numbers. The service
+itself never logs personal identity numbers and masks them in `toString()` (dept44 `PiiMasker`).
 
 ## Configuration
 
-|            Variabel             |                  Standard                   |                                Beskrivning                                |
-|---------------------------------|---------------------------------------------|---------------------------------------------------------------------------|
-| `DB_URL`                        | `jdbc:mariadb://localhost:3306/minaarenden` | JDBC-URL till MariaDB                                                     |
-| `DB_USER`, `DB_PASSWORD`        | `minaarenden` / `minaarenden`               | Databasanvändare                                                          |
-| `API_KEYS_ADMIN`                | tom                                         | Admin-nycklar, kommaseparerade. `ADMIN_API_KEY` läses om den inte är satt |
-| `API_KEYS_FRAGA`                | tom                                         | Fråge-nycklar, kommaseparerade                                            |
-| `MINA_ARENDEN_MUNICIPALITY_ID`  | `2281`                                      | Kommun-id för producenten                                                 |
-| `MINA_ARENDEN_PRODUCENT`        | `Referenskommunen`                          | Producentens namn i svaren                                                |
-| `MINA_ARENDEN_PREFIX`           | `REFKOM`                                    | Producentprefix i kundhändelsetyper (versaler A-Z)                        |
-| `MINA_ARENDEN_STANDARD_VERSION` | `6.1`                                       | Standardversion som anges i `version`                                     |
-| `MINA_ARENDEN_SEED`             | `false`                                     | Läs in exempelhändelser om kommunen saknar kundhändelser (endast demo)    |
-| `SERVER_PORT`                   | `8080`                                      | Lyssningsport                                                             |
+|             Variable             |                   Default                    |                              Description                              |
+|----------------------------------|----------------------------------------------|-----------------------------------------------------------------------|
+| `DB_URL`                         | `jdbc:mariadb://localhost:3306/activityfeed` | JDBC URL to MariaDB                                                   |
+| `DB_USER`, `DB_PASSWORD`         | `activityfeed` / `activityfeed`              | Database user                                                         |
+| `API_KEYS_ADMIN`                 | empty                                        | Admin keys, comma-separated. `ADMIN_API_KEY` is read if it is not set |
+| `API_KEYS_QUERY`                 | empty                                        | Query keys, comma-separated                                           |
+| `ACTIVITY_FEED_MUNICIPALITY_ID`  | `2281`                                       | Municipality id of the producer                                       |
+| `ACTIVITY_FEED_PRODUCER_NAME`    | `Referenskommunen`                           | The producer's name in responses                                      |
+| `ACTIVITY_FEED_PREFIX`           | `REFKOM`                                     | Producer prefix in activity types (uppercase A-Z)                     |
+| `ACTIVITY_FEED_STANDARD_VERSION` | `6.1`                                        | Standard version given in `version`                                   |
+| `ACTIVITY_FEED_SEED`             | `false`                                      | Load sample activities if the municipality has none (demo only)       |
+| `SERVER_PORT`                    | `8080`                                       | Listening port                                                        |
 
-`MINA_ARENDEN_MUNICIPALITY_ID`, `MINA_ARENDEN_PRODUCENT` och `MINA_ARENDEN_PREFIX` fyller i den enda producenten i
-`minaarenden.producenter`. Ska en instans vara producent för flera kommuner anges hela listan med indexerade
-variabler, eftersom en lista från miljövariabler ersätter listan i `application.yml` i stället för att läggas till:
-`MINAARENDEN_PRODUCENTER_0_MUNICIPALITYID=2281`, `MINAARENDEN_PRODUCENTER_0_NAMN=Sundsvalls kommun`,
-`MINAARENDEN_PRODUCENTER_0_PREFIX=...`, `MINAARENDEN_PRODUCENTER_1_MUNICIPALITYID=2262` och så vidare.
+`ACTIVITY_FEED_MUNICIPALITY_ID`, `ACTIVITY_FEED_PRODUCER_NAME` and `ACTIVITY_FEED_PREFIX` fill in the single producer
+in `activity-feed.producers`. For an instance that is the producer for several municipalities, give the whole list
+with indexed variables, because a list from environment variables replaces the list in `application.yml` instead of
+adding to it: `ACTIVITYFEED_PRODUCERS_0_MUNICIPALITYID=2281`, `ACTIVITYFEED_PRODUCERS_0_NAME=Sundsvalls kommun`,
+`ACTIVITYFEED_PRODUCERS_0_PREFIX=...`, `ACTIVITYFEED_PRODUCERS_1_MUNICIPALITYID=2262` and so on.
 
 ### Database Initialization
 
-Schemat ägs av [Flyway](https://github.com/flyway/flyway) (`src/main/resources/db/migration`) och migreras framåt vid
-varje start; `clean` är avstängt och Hibernate får bara validera schemat. Ändra modellen genom att lägga till en ny
-migration (och uppdatera `src/test/resources/db/schema/schema.sql`, som `SchemaVerificationTest` jämför med), aldrig
-genom att ändra en befintlig: checksumman i `flyway_schema_history` stoppar annars starten.
+[Flyway](https://github.com/flyway/flyway) owns the schema (`src/main/resources/db/migration`) and migrates it forward
+on every start. `clean` is disabled and Hibernate only validates the schema. Change the model by adding a new
+migration (and update `src/test/resources/db/schema/schema.sql`, which `SchemaVerificationTest` compares against),
+never by editing an existing one. Otherwise the checksum in `flyway_schema_history` stops the startup.
 
 ```
-kundhandelse
-  id, municipality_id, kundhandelse_id (unik per kommun), producent,
-  kund_identifierare, kund_typ, kund_tillagg,          -- part.kund
-  arende_identifierare, arende_typ,                     -- part.arende
-  rubrik, beskrivning, sprak, tidpunkt (UTC), kundhandelse_typ,
-  producentarendet_kraver_kundatgard, producentarendet_klart, version,
-  utokad_information (JSON-text), referenser (JSON-text), skapad, andrad
-kundhandelse_tagg
-  kundhandelse_ref → kundhandelse.id, tagg
+activity
+  id, municipality_id, activity_id (unique per municipality), producer,
+  customer_identifier, customer_type, customer_suffix,  -- part.kund
+  errand_identifier, errand_type,                       -- part.arende
+  title, description, language, occurred_at (UTC), activity_type,
+  customer_action_required, errand_completed, version,
+  extended_information (JSON text), reference_data (JSON text), created, modified
+activity_tag
+  activity_ref → activity.id, tag
 ```
 
 ## Deploy
 
-Första versionen deployas till Dokploy som Compose-tjänst med intern databas. Steg för steg, API-nycklar, omdeploy,
-säkerhetskopior och återställning: **[docs/dokploy.md](docs/dokploy.md)**.
+The first version deploys to Dokploy as a Compose service with an internal database. Step by step, API keys, redeploy,
+backups and restore: **[docs/dokploy.md](docs/dokploy.md)**.
 
-## Avgränsningar
+## Limitations
 
-- Ingen OAuth 2. Skatteverkets vidareförmedlingstjänst autentiserar sig mot producenter enligt anslutningsvillkoren;
-  API-nyckeln är ett enkelt skydd som kan kompletteras eller ersättas när det är känt.
-- Auktorisation av slutanvändaren (`anvandare`) görs inte; producenten ansvarar för detta i skarp drift.
-- Endast den synkrona frågan implementeras. Standardens övriga delar finns på
+- No OAuth 2. Skatteverket's forwarding service authenticates against producers according to the connection terms.
+  The API key is a simple protection that can be complemented or replaced once those terms are known.
+- The service does not authorize the end user (`anvandare`). The producer is responsible for that in production.
+- Only the synchronous query is implemented. The other parts of the standard are on
   [dataportal.se](https://www.dataportal.se/specifications/minaarenden/6.1).
 
-## Källor
+## Sources
 
 - [Digg: Mina ärenden](https://www.digg.se/digitala-tjanster/mina-arenden---arendeaterkoppling-fran-det-offentliga)
-- [Skatteverkets utvecklarportal: API Mina ärenden kundhändelser](https://www7.skatteverket.se/portal/apier-och-oppna-data/utvecklarportalen/api/mina-arenden-kundhandelser/1.0.0/%C3%96versikt)
+- [Skatteverket's developer portal: API Mina ärenden kundhändelser](https://www7.skatteverket.se/portal/apier-och-oppna-data/utvecklarportalen/api/mina-arenden-kundhandelser/1.0.0/%C3%96versikt)
 - [dept44](https://github.com/Sundsvallskommun/dept44)
 
 ## Contributing

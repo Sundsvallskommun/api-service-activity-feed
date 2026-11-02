@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    url: jdbc:tc:mariadb:10.6.14:///minaarenden
+    url: jdbc:tc:mariadb:10.6.14:///activityfeed
   jpa:
     properties:
       hibernate:
@@ -21,15 +21,15 @@ spring:
               create-target: target/database/generated-schema.sql
 security:
   api-key:
-    fraga-keys: junit-fraga-nyckel-0123456789abcdef0123456789
-    admin-keys: junit-admin-nyckel-0123456789abcdef0123456789
-minaarenden:
+    query-keys: junit-query-key-0123456789abcdef0123456789
+    admin-keys: junit-admin-key-0123456789abcdef0123456789
+activity-feed:
   standard-version: '6.1'
   seed: false
-  producenter:
+  producers:
     - municipality-id: '2281'
-      namn: Testköpings kommun
+      name: Testköpings kommun
       prefix: TESTKOP
     - municipality-id: '2262'
-      namn: Timrå kommun
+      name: Timrå kommun
       prefix: TIMRA
