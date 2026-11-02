@@ -13,18 +13,19 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import org.hibernate.annotations.TimeZoneStorage;
 import org.hibernate.annotations.UuidGenerator;
 import se.sundsvall.dept44.util.PiiMasker;
 
+import static java.time.ZoneId.systemDefault;
 import static org.hibernate.Length.LONG32;
+import static org.hibernate.annotations.TimeZoneStorageType.NORMALIZE;
 
 /**
  * An activity (kundhändelse) in the activity cache. The fields match the kundhandelse object in the API specification,
@@ -41,17 +42,14 @@ import static org.hibernate.Length.LONG32;
 		@Index(name = "ix_activity_occurred_at", columnList = "occurred_at"),
 		@Index(name = "ix_activity_type", columnList = "activity_type")
 	})
-public class ActivityEntity implements Serializable {
+public class ActivityEntity {
 
 	/** The unique constraint on activityId within the municipality. */
 	public static final String UNIQUE_ACTIVITY_ID = "uq_activity_municipality_id_activity_id";
 
-	@Serial
-	private static final long serialVersionUID = 4034813525227427812L;
-
 	@Id
 	@UuidGenerator
-	@Column(name = "id", nullable = false, length = 255)
+	@Column(name = "id", nullable = false, length = 36)
 	private String id;
 
 	@Column(name = "municipality_id", nullable = false, length = 4)
@@ -88,7 +86,8 @@ public class ActivityEntity implements Serializable {
 	private String language;
 
 	@Column(name = "occurred_at", nullable = false)
-	private Instant occurredAt;
+	@TimeZoneStorage(NORMALIZE)
+	private OffsetDateTime occurredAt;
 
 	@Column(name = "activity_type", nullable = false, length = 200)
 	private String activityType;
@@ -109,10 +108,12 @@ public class ActivityEntity implements Serializable {
 	private String referenceData;
 
 	@Column(name = "created", nullable = false)
-	private Instant created;
+	@TimeZoneStorage(NORMALIZE)
+	private OffsetDateTime created;
 
 	@Column(name = "modified")
-	private Instant modified;
+	@TimeZoneStorage(NORMALIZE)
+	private OffsetDateTime modified;
 
 	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "activity_tag",
@@ -128,12 +129,12 @@ public class ActivityEntity implements Serializable {
 
 	@PrePersist
 	void prePersist() {
-		created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+		created = OffsetDateTime.now(systemDefault()).truncatedTo(ChronoUnit.MILLIS);
 	}
 
 	@PreUpdate
 	void preUpdate() {
-		modified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+		modified = OffsetDateTime.now(systemDefault()).truncatedTo(ChronoUnit.MILLIS);
 	}
 
 	public String getId() {
@@ -292,15 +293,15 @@ public class ActivityEntity implements Serializable {
 		return this;
 	}
 
-	public Instant getOccurredAt() {
+	public OffsetDateTime getOccurredAt() {
 		return occurredAt;
 	}
 
-	public void setOccurredAt(final Instant occurredAt) {
+	public void setOccurredAt(final OffsetDateTime occurredAt) {
 		this.occurredAt = occurredAt;
 	}
 
-	public ActivityEntity withOccurredAt(final Instant occurredAt) {
+	public ActivityEntity withOccurredAt(final OffsetDateTime occurredAt) {
 		this.occurredAt = occurredAt;
 		return this;
 	}
@@ -383,28 +384,28 @@ public class ActivityEntity implements Serializable {
 		return this;
 	}
 
-	public Instant getCreated() {
+	public OffsetDateTime getCreated() {
 		return created;
 	}
 
-	public void setCreated(final Instant created) {
+	public void setCreated(final OffsetDateTime created) {
 		this.created = created;
 	}
 
-	public ActivityEntity withCreated(final Instant created) {
+	public ActivityEntity withCreated(final OffsetDateTime created) {
 		this.created = created;
 		return this;
 	}
 
-	public Instant getModified() {
+	public OffsetDateTime getModified() {
 		return modified;
 	}
 
-	public void setModified(final Instant modified) {
+	public void setModified(final OffsetDateTime modified) {
 		this.modified = modified;
 	}
 
-	public ActivityEntity withModified(final Instant modified) {
+	public ActivityEntity withModified(final OffsetDateTime modified) {
 		this.modified = modified;
 		return this;
 	}
@@ -422,10 +423,13 @@ public class ActivityEntity implements Serializable {
 		return this;
 	}
 
+	/**
+	 * Leaves out the lazily loaded tags, which cannot be read outside a session. The same goes for equals and toString.
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(activityId, activityType, created, customerActionRequired, customerIdentifier, customerSuffix, customerType, description, errandCompleted, errandIdentifier,
-			errandType, extendedInformation, id, language, modified, municipalityId, occurredAt, producer, referenceData, tags, title, version);
+			errandType, extendedInformation, id, language, modified, municipalityId, occurredAt, producer, referenceData, title, version);
 	}
 
 	@Override
@@ -442,8 +446,7 @@ public class ActivityEntity implements Serializable {
 			&& (errandCompleted == other.errandCompleted) && Objects.equals(errandIdentifier, other.errandIdentifier) && Objects.equals(errandType, other.errandType)
 			&& Objects.equals(extendedInformation, other.extendedInformation) && Objects.equals(id, other.id) && Objects.equals(language, other.language)
 			&& Objects.equals(modified, other.modified) && Objects.equals(municipalityId, other.municipalityId) && Objects.equals(occurredAt, other.occurredAt)
-			&& Objects.equals(producer, other.producer) && Objects.equals(referenceData, other.referenceData) && Objects.equals(tags, other.tags)
-			&& Objects.equals(title, other.title) && Objects.equals(version, other.version);
+			&& Objects.equals(producer, other.producer) && Objects.equals(referenceData, other.referenceData) && Objects.equals(title, other.title) && Objects.equals(version, other.version);
 	}
 
 	/**
@@ -451,29 +454,27 @@ public class ActivityEntity implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("ActivityEntity [id=").append(id)
-			.append(", municipalityId=").append(municipalityId)
-			.append(", activityId=").append(activityId)
-			.append(", producer=").append(producer)
-			.append(", customerIdentifier=").append(PiiMasker.maskPersonalNumber(customerIdentifier))
-			.append(", customerType=").append(customerType)
-			.append(", customerSuffix=").append(customerSuffix)
-			.append(", errandIdentifier=").append(errandIdentifier)
-			.append(", errandType=").append(errandType)
-			.append(", title=").append(title)
-			.append(", description=").append(description)
-			.append(", language=").append(language)
-			.append(", occurredAt=").append(occurredAt)
-			.append(", activityType=").append(activityType)
-			.append(", customerActionRequired=").append(customerActionRequired)
-			.append(", errandCompleted=").append(errandCompleted)
-			.append(", version=").append(version)
-			.append(", extendedInformation=").append(extendedInformation)
-			.append(", referenceData=").append(referenceData)
-			.append(", created=").append(created)
-			.append(", modified=").append(modified)
-			.append(", tags=").append(tags)
-			.append("]").toString();
+		return "ActivityEntity [id=" + id +
+			", municipalityId=" + municipalityId +
+			", activityId=" + activityId +
+			", producer=" + producer +
+			", customerIdentifier=" + PiiMasker.maskPersonalNumber(customerIdentifier) +
+			", customerType=" + customerType +
+			", customerSuffix=" + customerSuffix +
+			", errandIdentifier=" + errandIdentifier +
+			", errandType=" + errandType +
+			", title=" + title +
+			", description=" + description +
+			", language=" + language +
+			", occurredAt=" + occurredAt +
+			", activityType=" + activityType +
+			", customerActionRequired=" + customerActionRequired +
+			", errandCompleted=" + errandCompleted +
+			", version=" + version +
+			", extendedInformation=" + extendedInformation +
+			", referenceData=" + referenceData +
+			", created=" + created +
+			", modified=" + modified +
+			"]";
 	}
 }

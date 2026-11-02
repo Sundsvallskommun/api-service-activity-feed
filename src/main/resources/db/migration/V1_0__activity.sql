@@ -6,7 +6,7 @@
 -- REFKOM-x and refkom-X are different activities and the tags bygglov and Bygglov can both be on the same activity.
 
 CREATE TABLE activity (
-    id                        VARCHAR(255)  COLLATE utf8mb4_bin NOT NULL PRIMARY KEY,
+    id                        VARCHAR(36)  COLLATE utf8mb4_bin NOT NULL PRIMARY KEY,
     municipality_id           VARCHAR(4)    NOT NULL,
     activity_id               VARCHAR(100)  COLLATE utf8mb4_bin NOT NULL,
     producer                  VARCHAR(200)  NOT NULL,
@@ -41,7 +41,7 @@ CREATE INDEX ix_activity_type        ON activity (activity_type);
 
 -- Tags that point out producer errand types or activity types (fraga.taggar).
 CREATE TABLE activity_tag (
-    activity_ref  VARCHAR(255) COLLATE utf8mb4_bin NOT NULL,
+    activity_ref  VARCHAR(36) COLLATE utf8mb4_bin NOT NULL,
     tag           VARCHAR(100) COLLATE utf8mb4_bin NOT NULL,
     PRIMARY KEY (activity_ref, tag),
     CONSTRAINT fk_activity_tag_activity FOREIGN KEY (activity_ref) REFERENCES activity (id) ON DELETE CASCADE

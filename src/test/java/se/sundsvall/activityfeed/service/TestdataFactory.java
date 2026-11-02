@@ -1,6 +1,6 @@
 package se.sundsvall.activityfeed.service;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 import se.sundsvall.activityfeed.api.model.Arende;
@@ -64,7 +64,7 @@ public final class TestdataFactory {
 			.withTitle("Beslut om bygglov")
 			.withDescription("Bygglov har beviljats.")
 			.withLanguage("sv")
-			.withOccurredAt(Instant.parse("2026-09-20T08:00:00Z"))
+			.withOccurredAt(OffsetDateTime.parse("2026-09-20T08:00:00Z"))
 			.withActivityType("TESTKOP.BYGGLOV.BESLUT")
 			.withCustomerActionRequired(false)
 			.withErrandCompleted(true)

@@ -1,6 +1,6 @@
 package se.sundsvall.activityfeed.service.mapper;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.Test;
 import se.sundsvall.activityfeed.api.model.Arende;
 import se.sundsvall.activityfeed.api.model.Kund;
@@ -36,7 +36,7 @@ class ActivityMapperTest {
 		assertThat(entity.getErrandType()).isEqualTo("Diarienummer");
 		assertThat(entity.getLanguage()).isEqualTo("sv");
 		assertThat(entity.getVersion()).isEqualTo("6.1");
-		assertThat(entity.getOccurredAt()).isEqualTo(Instant.parse("2026-09-15T10:00:00Z"));
+		assertThat(entity.getOccurredAt()).isAtSameInstantAs(OffsetDateTime.parse("2026-09-15T10:00:00Z"));
 		assertThat(entity.getReferenceData()).isEqualTo("{\"diarienummer\":\"BYGG-1\"}");
 		assertThat(entity.getExtendedInformation()).isNull();
 		assertThat(entity.getTags()).containsExactly("bygglov");

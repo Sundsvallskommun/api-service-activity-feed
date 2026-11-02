@@ -6,7 +6,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ApiPathsTest {
+class ActivityQueryRoutingExceptionHandlerTest {
 
 	@ParameterizedTest
 	@CsvSource(value = {
@@ -21,6 +21,6 @@ class ApiPathsTest {
 		final var request = new MockHttpServletRequest("POST", uri);
 		request.setContextPath(contextPath);
 
-		assertThat(ApiPaths.isActivityQuery(request)).isEqualTo(expected);
+		assertThat(ActivityQueryRoutingExceptionHandler.isActivityQuery(request)).isEqualTo(expected);
 	}
 }

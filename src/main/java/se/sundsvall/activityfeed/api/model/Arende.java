@@ -2,9 +2,9 @@ package se.sundsvall.activityfeed.api.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Objects;
+import se.sundsvall.dept44.common.validators.annotation.OneOf;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
@@ -23,7 +23,9 @@ public class Arende {
 		"Konsumentreferens", "Producentarendereferens", "Diarienummer", "Kvittensnummer"
 	}, requiredMode = REQUIRED)
 	@NotBlank
-	@Pattern(regexp = "^(Konsumentreferens|Producentarendereferens|Diarienummer|Kvittensnummer)$", message = "arende.typ har ogiltigt värde")
+	@OneOf(value = {
+		"Konsumentreferens", "Producentarendereferens", "Diarienummer", "Kvittensnummer"
+	}, nullable = true, message = "arende.typ måste vara en av {allowedValues}")
 	private String typ;
 
 	public static Arende create() {
@@ -74,9 +76,8 @@ public class Arende {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("Arende [identifierare=").append(identifierare)
-			.append(", typ=").append(typ)
-			.append("]").toString();
+		return "Arende [identifierare=" + identifierare +
+			", typ=" + typ +
+			"]";
 	}
 }

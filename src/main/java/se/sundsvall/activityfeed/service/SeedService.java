@@ -18,7 +18,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Logs at startup how many activities each municipality has, so that after a redeploy the log shows right away that
- * the data is still there. If ACTIVITY_FEED_SEED=true, it also loads sample activities for municipalities that have
+ * the data is still there. If activity-feed.seed is true, it also loads sample activities for municipalities that have
  * none at all (development and demo only). Existing data is never touched.
  */
 @Component

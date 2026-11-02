@@ -5,7 +5,7 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
@@ -81,11 +81,11 @@ public final class ActivitySpecification {
 		};
 	}
 
-	public static Specification<ActivityEntity> withOccurredFrom(final Instant from) {
+	public static Specification<ActivityEntity> withOccurredFrom(final OffsetDateTime from) {
 		return from == null ? unrestricted() : (root, _, cb) -> cb.greaterThanOrEqualTo(root.get(ActivityEntity_.occurredAt), from);
 	}
 
-	public static Specification<ActivityEntity> withOccurredTo(final Instant to) {
+	public static Specification<ActivityEntity> withOccurredTo(final OffsetDateTime to) {
 		return to == null ? unrestricted() : (root, _, cb) -> cb.lessThanOrEqualTo(root.get(ActivityEntity_.occurredAt), to);
 	}
 
@@ -117,16 +117,23 @@ public final class ActivitySpecification {
 	}
 
 	static Expression<?> sortExpression(final Root<ActivityEntity> root, final CriteriaBuilder cb, final String attribute) {
-		return switch (attribute) {
-			case "RUBRIK" -> cb.lower(root.get(ActivityEntity_.title));
-			case "BESKRIVNING" -> cb.lower(root.get(ActivityEntity_.description));
-			case "PRODUCENT" -> cb.lower(root.get(ActivityEntity_.producer));
-			case "TIDPUNKT" -> root.get(ActivityEntity_.occurredAt);
-			case "KUNDHANDELSETYP" -> root.get(ActivityEntity_.activityType);
-			case "PRODUCENTARENDETKRAVERKUNDATGARD" -> root.get(ActivityEntity_.customerActionRequired);
-			case "PRODUCENTARENDETKLART" -> root.get(ActivityEntity_.errandCompleted);
-			default -> throw new IllegalArgumentException("Unknown sort attribute: " + attribute);
+		return switch (SortAttribute.valueOf(attribute)) {
+			case RUBRIK -> cb.lower(root.get(ActivityEntity_.title));
+			case BESKRIVNING -> cb.lower(root.get(ActivityEntity_.description));
+			case PRODUCENT -> cb.lower(root.get(ActivityEntity_.producer));
+			case TIDPUNKT -> root.get(ActivityEntity_.occurredAt);
+			case KUNDHANDELSETYP -> root.get(ActivityEntity_.activityType);
+			case PRODUCENTARENDETKRAVERKUNDATGARD -> root.get(ActivityEntity_.customerActionRequired);
+			case PRODUCENTARENDETKLART -> root.get(ActivityEntity_.errandCompleted);
 		};
+	}
+
+	/**
+	 * The values of sortering.attribut in the API, which Sortering has already validated. A new value does not compile
+	 * until it has a sort expression.
+	 */
+	enum SortAttribute {
+		RUBRIK, BESKRIVNING, PRODUCENT, TIDPUNKT, KUNDHANDELSETYP, PRODUCENTARENDETKRAVERKUNDATGARD, PRODUCENTARENDETKLART
 	}
 
 	static String escapeLike(final String value) {

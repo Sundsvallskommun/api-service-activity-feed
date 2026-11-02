@@ -79,10 +79,9 @@ public class CachadKundhandelse {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("CachadKundhandelse [part=").append(part)
-			.append(", kundhandelse=").append(kundhandelse)
-			.append(", taggar=").append(taggar)
-			.append("]").toString();
+		return "CachadKundhandelse [part=" + part +
+			", kundhandelse=" + kundhandelse +
+			", taggar=" + taggar +
+			"]";
 	}
 }

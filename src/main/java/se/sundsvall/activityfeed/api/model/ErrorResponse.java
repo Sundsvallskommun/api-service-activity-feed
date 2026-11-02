@@ -48,8 +48,7 @@ public class ErrorResponse {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("ErrorResponse [message=").append(message)
-			.append("]").toString();
+		return "ErrorResponse [message=" + message +
+			"]";
 	}
 }

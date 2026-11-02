@@ -8,8 +8,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Objects;
-import se.sundsvall.activityfeed.api.validation.ActivityTypeFormat;
-import se.sundsvall.activityfeed.api.validation.Limits;
 import tools.jackson.databind.JsonNode;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
@@ -21,51 +19,59 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 @Schema(description = "Kundhändelse att lägga i ärendecachen. producent, sprak och version fylls i från konfigurationen om de utelämnas.")
 public class NyKundhandelse {
 
-	@Schema(examples = "REFKOM-BYGG-2026-00123-3", requiredMode = REQUIRED)
+	@Schema(description = "Kundhändelsens id, satt av producenten och unikt inom kommunen. Samma id ersätter en befintlig kundhändelse.",
+		examples = "REFKOM-BYGG-2026-00123-3",
+		requiredMode = REQUIRED)
 	@NotBlank
 	@Size(max = 100)
 	private String kundhandelseId;
 
-	@Schema(requiredMode = REQUIRED)
+	@Schema(description = "Kunden, ärendet eller båda som kundhändelsen gäller", requiredMode = REQUIRED)
 	@NotNull
 	@Valid
 	private Part part;
 
-	@Schema(examples = "Beslut om bygglov", requiredMode = REQUIRED)
+	@Schema(description = "Kort rubrik för kundhändelsen", examples = "Beslut om bygglov", requiredMode = REQUIRED)
 	@NotBlank
 	@Size(max = 255)
 	private String rubrik;
 
-	@Schema(examples = "Bygglov har beviljats. Beslutet finns på Mina sidor.", requiredMode = REQUIRED)
+	@Schema(description = "Beskrivning av kundhändelsen för kunden", examples = "Bygglov har beviljats. Beslutet finns på Mina sidor.", requiredMode = REQUIRED)
 	@NotBlank
 	@Size(max = 65535)
 	private String beskrivning;
 
-	@Schema(description = "ISO 639-1, standard sv", examples = "sv")
+	@Schema(description = "Språket i rubrik och beskrivning enligt ISO 639-1. Utan värde blir det sv.", examples = "sv")
 	@Pattern(regexp = "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$", message = "sprak ska vara en språkkod enligt ISO 639-1, t.ex. sv")
 	@Size(max = 10)
 	private String sprak;
 
-	@Schema(description = "RFC 3339, eller lokal tid ÅÅÅÅ-MM-DD HH:MM:SS i Europe/Stockholm", examples = "2026-09-20T10:00:00+02:00", requiredMode = REQUIRED)
+	@Schema(description = "Tidpunkt för händelsen enligt RFC 3339, eller lokal svensk tid ÅÅÅÅ-MM-DD HH:MM:SS",
+		examples = "2026-09-20T10:00:00+02:00",
+		requiredMode = REQUIRED)
 	@NotBlank
 	@Size(max = 40)
 	private String tidpunkt;
 
-	@Schema(description = "PRODUCENTPREFIX.ARENDETYP.HANDELSETYP", examples = "REFKOM.BYGGLOV.BESLUT", requiredMode = REQUIRED)
+	@Schema(description = "Typ av kundhändelse i formatet PRODUCENTPREFIX.ARENDETYP.HANDELSETYP, där prefixet är kommunens",
+		examples = "REFKOM.BYGGLOV.BESLUT",
+		requiredMode = REQUIRED)
 	@NotBlank
-	@Size(max = ActivityTypeFormat.MAX_LENGTH)
-	@Pattern(regexp = ActivityTypeFormat.INGEST_PATTERN, message = "kundhandelseTyp ska ha formatet PRODUCENT.ARENDETYP.HANDELSETYP (versaler, siffror, understreck)")
+	// Strict for the producer's own data: at least three parts (producer, producer errand type, activity type), no empty
+	// parts. The length matches the column activity_type.
+	@Size(max = 200)
+	@Pattern(regexp = "^[A-Z]+(?:\\.[A-Z0-9_]+){2,}$", message = "kundhandelseTyp ska ha formatet PRODUCENT.ARENDETYP.HANDELSETYP (versaler, siffror, understreck)")
 	private String kundhandelseTyp;
 
-	@Schema(requiredMode = REQUIRED)
+	@Schema(description = "Om producentärendet väntar på en åtgärd från kunden", requiredMode = REQUIRED)
 	@NotNull
 	private Boolean producentarendetKraverKundatgard;
 
-	@Schema(requiredMode = REQUIRED)
+	@Schema(description = "Om producentärendet är avslutat", requiredMode = REQUIRED)
 	@NotNull
 	private Boolean producentarendetKlart;
 
-	@Schema(description = "Version av standarden, standard enligt konfigurationen", examples = "6.1")
+	@Schema(description = "Version av Mina ärendens standard. Utan värde blir det den konfigurerade versionen.", examples = "6.1")
 	@Pattern(regexp = "^\\d+(?:\\.\\d+)*$", message = "version ska anges som t.ex. 6.1")
 	@Size(max = 10)
 	private String version;
@@ -77,8 +83,8 @@ public class NyKundhandelse {
 	private JsonNode referenser;
 
 	@Schema(description = "Taggar som frågor kan filtrera på", examples = "bygglov")
-	@Size(max = Limits.MAX_TAGS, message = "taggar får innehålla högst " + Limits.MAX_TAGS + " taggar")
-	private List<@NotBlank(message = "taggar får inte innehålla tomma värden") @Size(max = Limits.MAX_TAG_LENGTH, message = "taggar: för lång tagg") String> taggar;
+	@Size(max = 100, message = "taggar får innehålla högst {max} taggar")
+	private List<@NotBlank(message = "taggar får inte innehålla tomma värden") @Size(max = 100, message = "taggar: för lång tagg") String> taggar;
 
 	public static NyKundhandelse create() {
 		return new NyKundhandelse();
@@ -273,20 +279,19 @@ public class NyKundhandelse {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("NyKundhandelse [kundhandelseId=").append(kundhandelseId)
-			.append(", part=").append(part)
-			.append(", rubrik=").append(rubrik)
-			.append(", beskrivning=").append(beskrivning)
-			.append(", sprak=").append(sprak)
-			.append(", tidpunkt=").append(tidpunkt)
-			.append(", kundhandelseTyp=").append(kundhandelseTyp)
-			.append(", producentarendetKraverKundatgard=").append(producentarendetKraverKundatgard)
-			.append(", producentarendetKlart=").append(producentarendetKlart)
-			.append(", version=").append(version)
-			.append(", utokadInformation=").append(utokadInformation)
-			.append(", referenser=").append(referenser)
-			.append(", taggar=").append(taggar)
-			.append("]").toString();
+		return "NyKundhandelse [kundhandelseId=" + kundhandelseId +
+			", part=" + part +
+			", rubrik=" + rubrik +
+			", beskrivning=" + beskrivning +
+			", sprak=" + sprak +
+			", tidpunkt=" + tidpunkt +
+			", kundhandelseTyp=" + kundhandelseTyp +
+			", producentarendetKraverKundatgard=" + producentarendetKraverKundatgard +
+			", producentarendetKlart=" + producentarendetKlart +
+			", version=" + version +
+			", utokadInformation=" + utokadInformation +
+			", referenser=" + referenser +
+			", taggar=" + taggar +
+			"]";
 	}
 }

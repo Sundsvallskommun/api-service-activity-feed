@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import se.sundsvall.activityfeed.api.model.Part;
 import se.sundsvall.activityfeed.integration.db.ActivityRepository;
 import se.sundsvall.activityfeed.integration.db.model.ActivityEntity;
+import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.dept44.problem.ThrowableProblem;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
@@ -135,7 +137,7 @@ class ActivityServiceTest {
 
 		assertThat(cached.getKundhandelse().getKundhandelseId()).isEqualTo("TESTKOP-1");
 		assertThat(cached.getTaggar()).containsExactly("bygglov");
-		verify(producerService).getProducer(MUNICIPALITY_ID);
+		verify(producerService).validateProducer(MUNICIPALITY_ID);
 	}
 
 	@Test
@@ -165,6 +167,16 @@ class ActivityServiceTest {
 		when(repository.countByMunicipalityId(MUNICIPALITY_ID)).thenReturn(7L);
 
 		assertThat(service.count(MUNICIPALITY_ID)).isEqualTo(7);
-		verify(producerService).getProducer(MUNICIPALITY_ID);
+		verify(producerService).validateProducer(MUNICIPALITY_ID);
+	}
+
+	@Test
+	void unknownMunicipalityGives404BeforeTheDatabaseIsAsked() {
+		doThrow(Problem.valueOf(NOT_FOUND, "Kommun 1480 är inte konfigurerad som producent")).when(producerService).validateProducer("1480");
+
+		assertThatExceptionOfType(ThrowableProblem.class).isThrownBy(() -> service.count("1480"));
+		assertThatExceptionOfType(ThrowableProblem.class).isThrownBy(() -> service.read("1480", "TESTKOP-1"));
+		assertThatExceptionOfType(ThrowableProblem.class).isThrownBy(() -> service.delete("1480", "TESTKOP-1"));
+		verifyNoInteractions(repository);
 	}
 }

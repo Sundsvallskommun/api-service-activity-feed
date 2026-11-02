@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.domain.Specification;
 import se.sundsvall.activityfeed.api.model.Behandling;
-import se.sundsvall.activityfeed.api.model.KundhandelseFragaRequest;
 import se.sundsvall.activityfeed.api.model.Paginering;
 import se.sundsvall.activityfeed.api.model.Part;
 import se.sundsvall.activityfeed.api.model.Sortering;
@@ -26,7 +25,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static se.sundsvall.activityfeed.service.TestdataFactory.MUNICIPALITY_ID;
 import static se.sundsvall.activityfeed.service.TestdataFactory.PRODUCER;
@@ -107,50 +105,11 @@ class ActivityQueryServiceTest {
 	}
 
 	@Test
-	void emptyPartyIsRejected() {
-		final var request = fraga();
-		request.getFraga().withParter(List.of(Part.create()));
-		when(producerService.getProducer(MUNICIPALITY_ID)).thenReturn(PRODUCER);
-
-		assertBadRequest(request, "Varje part måste innehålla kund, ärende eller båda");
-	}
-
-	@Test
-	void paginationWithoutSortingIsRejected() {
-		final var request = fraga();
-		request.getFraga().withBehandling(Behandling.create().withPaginering(Paginering.create().withOffset(0)));
-		when(producerService.getProducer(MUNICIPALITY_ID)).thenReturn(PRODUCER);
-
-		assertBadRequest(request, "Paginering kräver att sortering anges");
-
-		request.getFraga().getBehandling().withSortering(List.of());
-		assertBadRequest(request, "Paginering kräver att sortering anges");
-	}
-
-	@Test
-	void startDateAfterEndDateIsRejected() {
-		final var request = fraga();
-		request.getFraga().withStartDatum("2026-09-02").withSlutDatum("2026-09-01");
-		when(producerService.getProducer(MUNICIPALITY_ID)).thenReturn(PRODUCER);
-
-		assertBadRequest(request, "startDatum får inte vara efter slutDatum");
-	}
-
-	@Test
 	void unknownMunicipality() {
 		when(producerService.getProducer("1480")).thenThrow(Problem.valueOf(NOT_FOUND, "saknas"));
 
 		assertThatExceptionOfType(ThrowableProblem.class).isThrownBy(() -> service.answer("1480", fraga(), null));
 		verify(producerService).getProducer("1480");
 		verifyNoInteractions(repository);
-	}
-
-	private void assertBadRequest(final KundhandelseFragaRequest request, final String detail) {
-		assertThatExceptionOfType(ThrowableProblem.class)
-			.isThrownBy(() -> service.answer(MUNICIPALITY_ID, request, null))
-			.satisfies(problem -> {
-				assertThat(problem.getStatus()).isEqualTo(BAD_REQUEST);
-				assertThat(problem.getDetail()).isEqualTo(detail);
-			});
 	}
 }

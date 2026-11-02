@@ -1,8 +1,9 @@
 package se.sundsvall.activityfeed.integration.db;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
+import org.hibernate.Hibernate;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import se.sundsvall.activityfeed.api.model.Arende;
 import se.sundsvall.activityfeed.api.model.Kund;
 import se.sundsvall.activityfeed.api.model.Sortering;
@@ -19,7 +21,9 @@ import se.sundsvall.activityfeed.integration.db.model.ActivityEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace.NONE;
+import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 import static se.sundsvall.activityfeed.integration.db.model.ActivityEntity.UNIQUE_ACTIVITY_ID;
 import static se.sundsvall.activityfeed.integration.db.specification.ActivitySpecification.forParty;
 import static se.sundsvall.activityfeed.integration.db.specification.ActivitySpecification.sortedBy;
@@ -54,11 +58,26 @@ class ActivityRepositoryTest {
 	void findByMunicipalityIdAndActivityId() {
 		assertThat(repository.findByMunicipalityIdAndActivityId(MUNICIPALITY_ID, "TESTKOP-BYGG-2")).hasValueSatisfying(entity -> {
 			assertThat(entity.getTitle()).isEqualTo("beslut fattat");
-			assertThat(entity.getOccurredAt()).isEqualTo(Instant.parse("2026-09-02T12:30:00Z"));
+			assertThat(entity.getOccurredAt()).isAtSameInstantAs(OffsetDateTime.parse("2026-09-02T12:30:00Z"));
 			assertThat(entity.getTags()).containsExactlyInAnyOrder("bygglov", "kundatgard");
 			assertThat(entity.isErrandCompleted()).isTrue();
 		});
 		assertThat(repository.findByMunicipalityIdAndActivityId("2262", "TESTKOP-BYGG-2")).isEmpty();
+	}
+
+	/**
+	 * Outside a transaction the entity is detached when the repository call returns, with the tags not loaded.
+	 */
+	@Test
+	@Transactional(propagation = NOT_SUPPORTED)
+	void detachedEntityWithUnloadedTagsCanBeLoggedAndCompared() {
+		final var entity = repository.findByMunicipalityIdAndActivityId(MUNICIPALITY_ID, "TESTKOP-BYGG-2").orElseThrow();
+		final var sameRow = repository.findByMunicipalityIdAndActivityId(MUNICIPALITY_ID, "TESTKOP-BYGG-2").orElseThrow();
+
+		assertThat(Hibernate.isInitialized(entity.getTags())).isFalse();
+		assertThatNoException().isThrownBy(entity::toString);
+		assertThatNoException().isThrownBy(entity::hashCode);
+		assertThat(entity).isEqualTo(sameRow);
 	}
 
 	@Test
@@ -79,7 +98,7 @@ class ActivityRepositoryTest {
 			.withTitle("Ny")
 			.withDescription("Ny händelse")
 			.withLanguage("sv")
-			.withOccurredAt(Instant.parse("2026-09-20T08:00:00Z"))
+			.withOccurredAt(OffsetDateTime.parse("2026-09-20T08:00:00Z"))
 			.withActivityType("TESTKOP.TEST.SKAPAD")
 			.withVersion("6.1")
 			.withTags(Set.of("ny")));
@@ -102,7 +121,7 @@ class ActivityRepositoryTest {
 			.withTitle("r")
 			.withDescription("b")
 			.withLanguage("sv")
-			.withOccurredAt(Instant.now())
+			.withOccurredAt(OffsetDateTime.now())
 			.withActivityType("TIMRA.TEST.SKAPAD")
 			.withVersion("6.1");
 		repository.saveAndFlush(copy);
@@ -114,7 +133,7 @@ class ActivityRepositoryTest {
 			.withTitle("r")
 			.withDescription("b")
 			.withLanguage("sv")
-			.withOccurredAt(Instant.now())
+			.withOccurredAt(OffsetDateTime.now())
 			.withActivityType("TESTKOP.TEST.SKAPAD")
 			.withVersion("6.1");
 		// ActivityService recognizes the collision by the constraint name and answers 409.
@@ -206,7 +225,7 @@ class ActivityRepositoryTest {
 
 	@Test
 	void timeRange() {
-		assertThat(search(Specification.allOf(withOccurredFrom(Instant.parse("2026-09-01T00:00:00Z")), withOccurredTo(Instant.parse("2026-09-05T00:00:00Z")))))
+		assertThat(search(Specification.allOf(withOccurredFrom(OffsetDateTime.parse("2026-09-01T00:00:00Z")), withOccurredTo(OffsetDateTime.parse("2026-09-05T00:00:00Z")))))
 			.containsExactly("TESTKOP-BYGG-2");
 		assertThat(search(Specification.allOf(withOccurredFrom(null), withOccurredTo(null)))).hasSize(3);
 	}
@@ -252,7 +271,7 @@ class ActivityRepositoryTest {
 			.withTitle("r")
 			.withDescription("b")
 			.withLanguage("sv")
-			.withOccurredAt(Instant.parse("2026-09-20T08:00:00Z"))
+			.withOccurredAt(OffsetDateTime.parse("2026-09-20T08:00:00Z"))
 			.withActivityType("TESTKOP.TEST.SKAPAD")
 			.withVersion("6.1");
 	}

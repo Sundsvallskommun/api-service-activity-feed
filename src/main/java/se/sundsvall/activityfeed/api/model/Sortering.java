@@ -2,8 +2,8 @@ package se.sundsvall.activityfeed.api.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import java.util.Objects;
+import se.sundsvall.dept44.common.validators.annotation.OneOf;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
@@ -14,7 +14,9 @@ public class Sortering {
 		"RUBRIK", "BESKRIVNING", "PRODUCENT", "TIDPUNKT", "KUNDHANDELSETYP", "PRODUCENTARENDETKRAVERKUNDATGARD", "PRODUCENTARENDETKLART"
 	}, requiredMode = REQUIRED)
 	@NotNull
-	@Pattern(regexp = "^(RUBRIK|BESKRIVNING|PRODUCENT|TIDPUNKT|KUNDHANDELSETYP|PRODUCENTARENDETKRAVERKUNDATGARD|PRODUCENTARENDETKLART)$", message = "sortering.attribut har ogiltigt värde")
+	@OneOf(value = {
+		"RUBRIK", "BESKRIVNING", "PRODUCENT", "TIDPUNKT", "KUNDHANDELSETYP", "PRODUCENTARENDETKRAVERKUNDATGARD", "PRODUCENTARENDETKLART"
+	}, nullable = true, message = "sortering.attribut måste vara en av {allowedValues}")
 	private String attribut;
 
 	@Schema(requiredMode = REQUIRED)
@@ -69,9 +71,8 @@ public class Sortering {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("Sortering [attribut=").append(attribut)
-			.append(", stigande=").append(stigande)
-			.append("]").toString();
+		return "Sortering [attribut=" + attribut +
+			", stigande=" + stigande +
+			"]";
 	}
 }

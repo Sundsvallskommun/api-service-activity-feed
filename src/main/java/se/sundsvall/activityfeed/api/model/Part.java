@@ -74,9 +74,8 @@ public class Part {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("Part [kund=").append(kund)
-			.append(", arende=").append(arende)
-			.append("]").toString();
+		return "Part [kund=" + kund +
+			", arende=" + arende +
+			"]";
 	}
 }

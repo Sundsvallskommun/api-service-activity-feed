@@ -138,14 +138,13 @@ public class Metadata {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("Metadata [parter=").append(parter)
-			.append(", kundhandelseTyper=").append(kundhandelseTyper)
-			.append(", taggar=").append(taggar)
-			.append(", startDatum=").append(startDatum)
-			.append(", slutDatum=").append(slutDatum)
-			.append(", onskatSprak=").append(onskatSprak)
-			.append(", behandling=").append(behandling)
-			.append("]").toString();
+		return "Metadata [parter=" + parter +
+			", kundhandelseTyper=" + kundhandelseTyper +
+			", taggar=" + taggar +
+			", startDatum=" + startDatum +
+			", slutDatum=" + slutDatum +
+			", onskatSprak=" + onskatSprak +
+			", behandling=" + behandling +
+			"]";
 	}
 }

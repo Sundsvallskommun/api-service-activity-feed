@@ -8,6 +8,7 @@ import se.sundsvall.dept44.problem.ThrowableProblem;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 class ProducerServiceTest {
@@ -23,12 +24,22 @@ class ProducerServiceTest {
 	}
 
 	@Test
+	void validateProducer() {
+		assertThatNoException().isThrownBy(() -> service.validateProducer("2281"));
+	}
+
+	@Test
 	void unknownMunicipalityGives404() {
 		assertThatExceptionOfType(ThrowableProblem.class)
 			.isThrownBy(() -> service.getProducer("1480"))
-			.satisfies(problem -> {
-				assertThat(problem.getStatus()).isEqualTo(NOT_FOUND);
-				assertThat(problem.getDetail()).isEqualTo("Kommun 1480 är inte konfigurerad som producent");
-			});
+			.satisfies(ProducerServiceTest::isNotConfigured);
+		assertThatExceptionOfType(ThrowableProblem.class)
+			.isThrownBy(() -> service.validateProducer("1480"))
+			.satisfies(ProducerServiceTest::isNotConfigured);
+	}
+
+	private static void isNotConfigured(final ThrowableProblem problem) {
+		assertThat(problem.getStatus()).isEqualTo(NOT_FOUND);
+		assertThat(problem.getDetail()).isEqualTo("Kommun 1480 är inte konfigurerad som producent");
 	}
 }

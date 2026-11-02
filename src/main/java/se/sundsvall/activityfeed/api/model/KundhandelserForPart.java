@@ -75,10 +75,9 @@ public class KundhandelserForPart {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("KundhandelserForPart [part=").append(part)
-			.append(", totaltAntalKundhandelser=").append(totaltAntalKundhandelser)
-			.append(", kundhandelserForPart=").append(kundhandelserForPart)
-			.append("]").toString();
+		return "KundhandelserForPart [part=" + part +
+			", totaltAntalKundhandelser=" + totaltAntalKundhandelser +
+			", kundhandelserForPart=" + kundhandelserForPart +
+			"]";
 	}
 }

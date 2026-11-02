@@ -7,27 +7,31 @@ import tools.jackson.databind.JsonNode;
 @Schema(description = "En kundhändelse enligt Mina ärendens standard")
 public class Kundhandelse {
 
-	@Schema(examples = "REFKOM-BYGG-2026-00123-1")
+	@Schema(description = "Kundhändelsens id, satt av producenten och unikt inom kommunen", examples = "REFKOM-BYGG-2026-00123-1")
 	private String kundhandelseId;
 
+	@Schema(description = "Kort rubrik för kundhändelsen", examples = "Ansökan om bygglov mottagen")
 	private String rubrik;
 
+	@Schema(description = "Beskrivning av kundhändelsen för kunden", examples = "Vi har tagit emot din ansökan om bygglov.")
 	private String beskrivning;
 
-	@Schema(description = "ISO 639-1", examples = "sv")
+	@Schema(description = "Språket i rubrik och beskrivning enligt ISO 639-1", examples = "sv")
 	private String sprak;
 
-	@Schema(examples = "Referenskommunen")
+	@Schema(description = "Namnet på producenten som kundhändelsen kommer från", examples = "Referenskommunen")
 	private String producent;
 
-	@Schema(description = "RFC 3339", examples = "2026-09-01T10:15:00+02:00")
+	@Schema(description = "Tidpunkt för händelsen enligt RFC 3339, i svensk tid", examples = "2026-09-01T10:15:00+02:00")
 	private String tidpunkt;
 
-	@Schema(examples = "REFKOM.BYGGLOV.ANSOKAN_MOTTAGEN")
+	@Schema(description = "Typ av kundhändelse i formatet PRODUCENTPREFIX.ARENDETYP.HANDELSETYP", examples = "REFKOM.BYGGLOV.ANSOKAN_MOTTAGEN")
 	private String kundhandelseTyp;
 
+	@Schema(description = "Om producentärendet väntar på en åtgärd från kunden")
 	private boolean producentarendetKraverKundatgard;
 
+	@Schema(description = "Om producentärendet är avslutat")
 	private boolean producentarendetKlart;
 
 	@Schema(description = "Version av standarden som producenten implementerat", examples = "6.1")
@@ -219,19 +223,18 @@ public class Kundhandelse {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("Kundhandelse [kundhandelseId=").append(kundhandelseId)
-			.append(", rubrik=").append(rubrik)
-			.append(", beskrivning=").append(beskrivning)
-			.append(", sprak=").append(sprak)
-			.append(", producent=").append(producent)
-			.append(", tidpunkt=").append(tidpunkt)
-			.append(", kundhandelseTyp=").append(kundhandelseTyp)
-			.append(", producentarendetKraverKundatgard=").append(producentarendetKraverKundatgard)
-			.append(", producentarendetKlart=").append(producentarendetKlart)
-			.append(", version=").append(version)
-			.append(", utokadInformation=").append(utokadInformation)
-			.append(", referenser=").append(referenser)
-			.append("]").toString();
+		return "Kundhandelse [kundhandelseId=" + kundhandelseId +
+			", rubrik=" + rubrik +
+			", beskrivning=" + beskrivning +
+			", sprak=" + sprak +
+			", producent=" + producent +
+			", tidpunkt=" + tidpunkt +
+			", kundhandelseTyp=" + kundhandelseTyp +
+			", producentarendetKraverKundatgard=" + producentarendetKraverKundatgard +
+			", producentarendetKlart=" + producentarendetKlart +
+			", version=" + version +
+			", utokadInformation=" + utokadInformation +
+			", referenser=" + referenser +
+			"]";
 	}
 }

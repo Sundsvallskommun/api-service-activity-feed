@@ -61,9 +61,8 @@ public class Behandling {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("Behandling [sortering=").append(sortering)
-			.append(", paginering=").append(paginering)
-			.append("]").toString();
+		return "Behandling [sortering=" + sortering +
+			", paginering=" + paginering +
+			"]";
 	}
 }

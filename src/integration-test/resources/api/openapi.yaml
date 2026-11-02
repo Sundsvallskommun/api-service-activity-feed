@@ -333,7 +333,6 @@ components:
           examples:
             - Diarienummer
           minLength: 1
-          pattern: ^(Konsumentreferens|Producentarendereferens|Diarienummer|Kvittensnummer)$
       required:
         - identifierare
         - typ
@@ -365,7 +364,6 @@ components:
           examples:
             - Personnummer
           minLength: 1
-          pattern: ^(Personnummer|Organisationsnummer|Samordningsnummer)$
       required:
         - identifierare
         - typ
@@ -376,27 +374,31 @@ components:
       properties:
         kundhandelseId:
           type: string
+          description: "Kundhändelsens id, satt av producenten och unikt inom kommunen. Samma id ersätter en befintlig kundhändelse."
           examples:
             - REFKOM-BYGG-2026-00123-3
           maxLength: 100
           minLength: 0
         part:
           $ref: "#/components/schemas/Part"
+          description: "Kunden, ärendet eller båda som kundhändelsen gäller"
         rubrik:
           type: string
+          description: Kort rubrik för kundhändelsen
           examples:
             - Beslut om bygglov
           maxLength: 255
           minLength: 0
         beskrivning:
           type: string
+          description: Beskrivning av kundhändelsen för kunden
           examples:
             - Bygglov har beviljats. Beslutet finns på Mina sidor.
           maxLength: 65535
           minLength: 0
         sprak:
           type: string
-          description: "ISO 639-1, standard sv"
+          description: "Språket i rubrik och beskrivning enligt ISO 639-1. Utan värde blir det sv."
           examples:
             - sv
           maxLength: 10
@@ -404,14 +406,14 @@ components:
           pattern: "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
         tidpunkt:
           type: string
-          description: "RFC 3339, eller lokal tid ÅÅÅÅ-MM-DD HH:MM:SS i Europe/Stockholm"
+          description: "Tidpunkt för händelsen enligt RFC 3339, eller lokal svensk tid ÅÅÅÅ-MM-DD HH:MM:SS"
           examples:
             - 2026-09-20T10:00:00+02:00
           maxLength: 40
           minLength: 0
         kundhandelseTyp:
           type: string
-          description: PRODUCENTPREFIX.ARENDETYP.HANDELSETYP
+          description: "Typ av kundhändelse i formatet PRODUCENTPREFIX.ARENDETYP.HANDELSETYP, där prefixet är kommunens"
           examples:
             - REFKOM.BYGGLOV.BESLUT
           maxLength: 200
@@ -419,11 +421,13 @@ components:
           pattern: "^[A-Z]+(?:\\.[A-Z0-9_]+){2,}$"
         producentarendetKraverKundatgard:
           type: boolean
+          description: Om producentärendet väntar på en åtgärd från kunden
         producentarendetKlart:
           type: boolean
+          description: Om producentärendet är avslutat
         version:
           type: string
-          description: "Version av standarden, standard enligt konfigurationen"
+          description: "Version av Mina ärendens standard. Utan värde blir det den konfigurerade versionen."
           examples:
             - "6.1"
           maxLength: 10
@@ -618,7 +622,6 @@ components:
             - PRODUCENTARENDETKLART
           examples:
             - TIDPUNKT
-          pattern: ^(RUBRIK|BESKRIVNING|PRODUCENT|TIDPUNKT|KUNDHANDELSETYP|PRODUCENTARENDETKRAVERKUNDATGARD|PRODUCENTARENDETKLART)$
         stigande:
           type: boolean
       required:
@@ -649,34 +652,45 @@ components:
       properties:
         kundhandelseId:
           type: string
+          description: "Kundhändelsens id, satt av producenten och unikt inom kommunen"
           examples:
             - REFKOM-BYGG-2026-00123-1
         rubrik:
           type: string
+          description: Kort rubrik för kundhändelsen
+          examples:
+            - Ansökan om bygglov mottagen
         beskrivning:
           type: string
+          description: Beskrivning av kundhändelsen för kunden
+          examples:
+            - Vi har tagit emot din ansökan om bygglov.
         sprak:
           type: string
-          description: ISO 639-1
+          description: Språket i rubrik och beskrivning enligt ISO 639-1
           examples:
             - sv
         producent:
           type: string
+          description: Namnet på producenten som kundhändelsen kommer från
           examples:
             - Referenskommunen
         tidpunkt:
           type: string
-          description: RFC 3339
+          description: "Tidpunkt för händelsen enligt RFC 3339, i svensk tid"
           examples:
             - 2026-09-01T10:15:00+02:00
         kundhandelseTyp:
           type: string
+          description: Typ av kundhändelse i formatet PRODUCENTPREFIX.ARENDETYP.HANDELSETYP
           examples:
             - REFKOM.BYGGLOV.ANSOKAN_MOTTAGEN
         producentarendetKraverKundatgard:
           type: boolean
+          description: Om producentärendet väntar på en åtgärd från kunden
         producentarendetKlart:
           type: boolean
+          description: Om producentärendet är avslutat
         version:
           type: string
           description: Version av standarden som producenten implementerat

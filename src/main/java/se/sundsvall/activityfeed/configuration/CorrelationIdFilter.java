@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import se.sundsvall.activityfeed.api.validation.Limits;
 
 /**
  * Puts skv_client_correlation_id in the MDC (key skvClientCorrelationId) for the whole request, so log lines can be
@@ -22,7 +21,17 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
 	public static final String HEADER = "skv_client_correlation_id";
 	public static final String MDC_KEY = "skvClientCorrelationId";
 
-	private static final Pattern ALLOWED_FORMAT = Pattern.compile(Limits.CORRELATION_ID_PATTERN);
+	/** Longest allowed value. */
+	public static final int MAX_LENGTH = 200;
+
+	/**
+	 * Printable ASCII characters (spaces included), at least one visible character and at most {@link #MAX_LENGTH}. The
+	 * API definition allows any format. The service description recommends a UUID. The controller validates the header
+	 * with the same format.
+	 */
+	public static final String FORMAT = "^(?=.*[\\x21-\\x7E])[\\x20-\\x7E]{1," + MAX_LENGTH + "}$";
+
+	private static final Pattern ALLOWED_FORMAT = Pattern.compile(FORMAT);
 
 	@Override
 	protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws ServletException, IOException {

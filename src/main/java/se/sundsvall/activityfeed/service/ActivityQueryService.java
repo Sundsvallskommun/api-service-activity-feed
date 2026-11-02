@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import se.sundsvall.activityfeed.api.model.Behandling;
 import se.sundsvall.activityfeed.api.model.Delfraga;
-import se.sundsvall.activityfeed.api.model.Fraga;
 import se.sundsvall.activityfeed.api.model.KundhandelseFragaRequest;
 import se.sundsvall.activityfeed.api.model.KundhandelseFragaResponse;
 import se.sundsvall.activityfeed.api.model.KundhandelserForPart;
@@ -19,9 +18,7 @@ import se.sundsvall.activityfeed.integration.db.OffsetPageable;
 import se.sundsvall.activityfeed.integration.db.model.ActivityEntity;
 import se.sundsvall.activityfeed.service.mapper.ActivityMapper;
 import se.sundsvall.activityfeed.util.DateTimeUtil;
-import se.sundsvall.dept44.problem.Problem;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static se.sundsvall.activityfeed.integration.db.specification.ActivitySpecification.forParty;
 import static se.sundsvall.activityfeed.integration.db.specification.ActivitySpecification.sortedBy;
 import static se.sundsvall.activityfeed.integration.db.specification.ActivitySpecification.withActivityTypes;
@@ -55,7 +52,6 @@ public class ActivityQueryService {
 	public KundhandelseFragaResponse answer(final String municipalityId, final KundhandelseFragaRequest request, final String acceptLanguage) {
 		final var producer = producerService.getProducer(municipalityId);
 		final var query = request.getFraga();
-		validate(query);
 
 		final var processing = Optional.ofNullable(query.getBehandling());
 		final var sorting = processing.map(Behandling::getSortering).orElse(null);
@@ -112,19 +108,6 @@ public class ActivityQueryService {
 		return KundhandelserForPart.create()
 			.withTotaltAntalKundhandelser(total)
 			.withKundhandelserForPart(hits.stream().map(ActivityMapper::toKundhandelse).toList());
-	}
-
-	private static void validate(final Fraga query) {
-		if (query.getParter().stream().anyMatch(party -> party == null || party.isEmpty())) {
-			throw Problem.valueOf(BAD_REQUEST, "Varje part måste innehålla kund, ärende eller båda");
-		}
-		final var processing = query.getBehandling();
-		if (processing != null && processing.getPaginering() != null && (processing.getSortering() == null || processing.getSortering().isEmpty())) {
-			throw Problem.valueOf(BAD_REQUEST, "Paginering kräver att sortering anges");
-		}
-		if (query.getStartDatum() != null && query.getSlutDatum() != null && query.getStartDatum().compareTo(query.getSlutDatum()) > 0) {
-			throw Problem.valueOf(BAD_REQUEST, "startDatum får inte vara efter slutDatum");
-		}
 	}
 
 }

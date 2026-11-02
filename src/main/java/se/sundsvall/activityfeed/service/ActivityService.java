@@ -102,12 +102,12 @@ public class ActivityService {
 
 	@Transactional(readOnly = true)
 	public long count(final String municipalityId) {
-		producerService.getProducer(municipalityId);
+		producerService.validateProducer(municipalityId);
 		return repository.countByMunicipalityId(municipalityId);
 	}
 
 	private ActivityEntity find(final String municipalityId, final String activityId) {
-		producerService.getProducer(municipalityId);
+		producerService.validateProducer(municipalityId);
 		return repository.findByMunicipalityIdAndActivityId(municipalityId, activityId)
 			.orElseThrow(() -> Problem.valueOf(NOT_FOUND, "Kundhändelsen " + activityId + " finns inte"));
 	}

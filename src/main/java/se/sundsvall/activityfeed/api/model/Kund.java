@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Objects;
+import se.sundsvall.dept44.common.validators.annotation.OneOf;
 import se.sundsvall.dept44.util.PiiMasker;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
@@ -29,7 +30,9 @@ public class Kund {
 		"Personnummer", "Organisationsnummer", "Samordningsnummer"
 	}, requiredMode = REQUIRED)
 	@NotBlank
-	@Pattern(regexp = "^(Personnummer|Organisationsnummer|Samordningsnummer)$", message = "kund.typ har ogiltigt värde")
+	@OneOf(value = {
+		"Personnummer", "Organisationsnummer", "Samordningsnummer"
+	}, nullable = true, message = "kund.typ måste vara en av {allowedValues}")
 	private String typ;
 
 	public static Kund create() {
@@ -93,10 +96,9 @@ public class Kund {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("Kund [identifierare=").append(PiiMasker.maskPersonalNumber(identifierare))
-			.append(", tillagg=").append(tillagg)
-			.append(", typ=").append(typ)
-			.append("]").toString();
+		return "Kund [identifierare=" + PiiMasker.maskPersonalNumber(identifierare) +
+			", tillagg=" + tillagg +
+			", typ=" + typ +
+			"]";
 	}
 }

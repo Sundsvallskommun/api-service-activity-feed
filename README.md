@@ -38,15 +38,24 @@ cd api-service-activity-feed
 
 2. **Configure the service.** See [Configuration](#configuration).
 
-3. **Build and run** with Maven against a MariaDB:
+3. **Build and run** with Maven against a MariaDB. Put the local settings in
+   `src/main/resources/application-default.yml`, which git ignores:
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/activityfeed
+    username: activityfeed
+    password: secret
+activity-feed:
+  seed: true
+```
 
 ```bash
-export DB_URL=jdbc:mariadb://localhost:3306/activityfeed DB_USER=activityfeed DB_PASSWORD=secret
-export ACTIVITY_FEED_SEED=true
 mvn spring-boot:run
 ```
 
-With `ACTIVITY_FEED_SEED=true` the service loads five sample activities on first start
+With `activity-feed.seed: true` the service loads five sample activities on first start
 (`src/main/resources/sample-activities.json`), so you can try queries right away.
 
 More test data, 49 activities for individuals and companies across many errand types, loads through the API with
@@ -116,8 +125,8 @@ a producer fails.
 | Errors                     | `{"message": "..."}` with 400, 404, 405, 409, 415 or 500                               |
 
 Required header: `skv_client_correlation_id`, a non-empty string of printable characters, at most 200. The service
-puts the value in the MDC as `skvClientCorrelationId` next to dept44's `x-request-id`. Limits per request
-(`Limits.java`): at most 100 parties, 100 activity types, 100 tags, and `paginering.limit` at most 1000.
+puts the value in the MDC as `skvClientCorrelationId` next to dept44's `x-request-id`. Limits per request: at most
+100 parties, 100 activity types, 100 tags, and `paginering.limit` at most 1000.
 
 ### Load activities into the cache
 
@@ -152,32 +161,29 @@ There are also `GET /{municipalityId}/kundhandelser/{kundhandelseId}`,
 The service does no authentication of its own. dept44's `SecurityConfiguration` lets every request through, as in the
 other dept44 services, so access control is up to the environment the service runs in.
 
-dept44's defaults log request payloads, expose every actuator endpoint and show health details to everyone. They take
-precedence over the service's `application.yml`, so `SecurityDefaultsEnvironmentPostProcessor` puts the service's
-values above the configuration files. That means no payload logging, only `health` and `info` exposed, and no health
-details. Environment variables still take precedence, e.g. `LOGGING_LEVEL_SE_SUNDSVALL_DEPT44_PAYLOAD=TRACE` for local
-debugging or `MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE` for more actuator endpoints. `logbook.body-filters` masks
-personal identity numbers in logged payloads. The service itself never logs personal identity numbers and masks them in
-`toString()` (dept44 `PiiMasker`).
+Payload logging and actuator follow dept44's defaults, which `application.yml` and other properties can override.
+dept44 logs request payloads with an allowlist (`logbook.body-filters.allowlist.paths`): every value in a JSON body is
+masked unless its field is on the list, and the service lists none. Actuator exposes every endpoint except `heapdump`,
+`threaddump` and `shutdown`, and health shows details. Since the service has no authentication, keep `/actuator` out of
+reach from outside, or limit `management.endpoints.web.exposure.include`. The service itself never logs personal
+identity numbers and masks them in `toString()` (dept44 `PiiMasker`).
 
 ## Configuration
 
-|             Variable             |                   Default                    |                           Description                           |
-|----------------------------------|----------------------------------------------|-----------------------------------------------------------------|
-| `DB_URL`                         | `jdbc:mariadb://localhost:3306/activityfeed` | JDBC URL to MariaDB                                             |
-| `DB_USER`, `DB_PASSWORD`         | `activityfeed` / `activityfeed`              | Database user                                                   |
-| `ACTIVITY_FEED_MUNICIPALITY_ID`  | `2281`                                       | Municipality id of the producer                                 |
-| `ACTIVITY_FEED_PRODUCER_NAME`    | `Referenskommunen`                           | The producer's name in responses                                |
-| `ACTIVITY_FEED_PREFIX`           | `REFKOM`                                     | Producer prefix in activity types (uppercase A-Z)               |
-| `ACTIVITY_FEED_STANDARD_VERSION` | `6.1`                                        | Standard version given in `version`                             |
-| `ACTIVITY_FEED_SEED`             | `false`                                      | Load sample activities if the municipality has none (demo only) |
-| `SERVER_PORT`                    | `8080`                                       | Listening port                                                  |
+|                          Property                          |      Default       |                           Description                           |
+|------------------------------------------------------------|--------------------|-----------------------------------------------------------------|
+| `spring.datasource.url`                                    | none               | JDBC URL to MariaDB                                             |
+| `spring.datasource.username`, `spring.datasource.password` | none               | Database user                                                   |
+| `activity-feed.producers[n].municipality-id`               | `2281`             | Municipality id of the producer                                 |
+| `activity-feed.producers[n].name`                          | `Referenskommunen` | The producer's name in responses                                |
+| `activity-feed.producers[n].prefix`                        | `REFKOM`           | Producer prefix in activity types (uppercase A-Z)               |
+| `activity-feed.standard-version`                           | `6.1`              | Standard version given in `version`                             |
+| `activity-feed.seed`                                       | `false`            | Load sample activities if the municipality has none (demo only) |
+| `server.port`                                              | `8080`             | Listening port                                                  |
 
-`ACTIVITY_FEED_MUNICIPALITY_ID`, `ACTIVITY_FEED_PRODUCER_NAME` and `ACTIVITY_FEED_PREFIX` fill in the single producer
-in `activity-feed.producers`. For an instance that is the producer for several municipalities, give the whole list
-with indexed variables, because a list from environment variables replaces the list in `application.yml` instead of
-adding to it: `ACTIVITYFEED_PRODUCERS_0_MUNICIPALITYID=2281`, `ACTIVITYFEED_PRODUCERS_0_NAME=Sundsvalls kommun`,
-`ACTIVITYFEED_PRODUCERS_0_PREFIX=...`, `ACTIVITYFEED_PRODUCERS_1_MUNICIPALITYID=2262` and so on.
+`application.yml` has a single producer, the reference municipality. For an instance that is the producer for several
+municipalities, give the whole list, because a list from another properties source replaces the list in
+`application.yml` instead of adding to it.
 
 ### Database Initialization
 

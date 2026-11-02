@@ -1,6 +1,6 @@
 package se.sundsvall.activityfeed.integration.db;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import org.junit.jupiter.api.BeforeAll;
@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import se.sundsvall.activityfeed.integration.db.model.ActivityEntity;
 
 import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanConstructor;
-import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanEquals;
-import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanHashCode;
-import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanToString;
+import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanEqualsExcluding;
+import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanHashCodeExcluding;
+import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanToStringExcluding;
 import static com.google.code.beanmatchers.BeanMatchers.hasValidGettersAndSetters;
 import static com.google.code.beanmatchers.BeanMatchers.registerValueGenerator;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +21,7 @@ class ActivityEntityTest {
 
 	@BeforeAll
 	static void setup() {
-		registerValueGenerator(() -> Instant.ofEpochSecond(ThreadLocalRandom.current().nextLong(1, 4_000_000_000L)), Instant.class);
+		registerValueGenerator(() -> OffsetDateTime.now().plusSeconds(ThreadLocalRandom.current().nextLong(1, 4_000_000_000L)), OffsetDateTime.class);
 	}
 
 	@Test
@@ -29,14 +29,14 @@ class ActivityEntityTest {
 		assertThat(ActivityEntity.class, allOf(
 			hasValidBeanConstructor(),
 			hasValidGettersAndSetters(),
-			hasValidBeanHashCode(),
-			hasValidBeanEquals(),
-			hasValidBeanToString()));
+			hasValidBeanHashCodeExcluding("tags"),
+			hasValidBeanEqualsExcluding("tags"),
+			hasValidBeanToStringExcluding("tags")));
 	}
 
 	@Test
 	void testBuilderMethods() {
-		final var timestamp = Instant.parse("2026-09-20T08:00:00Z");
+		final var timestamp = OffsetDateTime.parse("2026-09-20T08:00:00Z");
 		final var entity = ActivityEntity.create()
 			.withId("5d8c3e0a-1b7f-4c2e-9a6d-3f1e2b4c5a6d")
 			.withMunicipalityId("2281")

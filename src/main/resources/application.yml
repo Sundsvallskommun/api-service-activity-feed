@@ -11,9 +11,6 @@ spring:
     name: api-activity-feed
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: ${DB_URL:jdbc:mariadb://localhost:3306/activityfeed}
-    username: ${DB_USER:activityfeed}
-    password: ${DB_PASSWORD:activityfeed}
   flyway:
     # Flyway owns the schema (src/main/resources/db/migration). Migrations run forward on every start, never clean,
     # so a redeploy never empties the database.
@@ -38,21 +35,11 @@ management:
     health:
       probes:
         enabled: true
-# Payload logging, actuator exposure and health details are set by SecurityDefaultsEnvironmentPostProcessor,
-# because dept44's defaults would otherwise take precedence over this file.
-logbook:
-  body-filters:
-    # If payload logging is turned on anyway, personal identity numbers in queries and ingest are masked.
-    json-path:
-      - key: '$.anvandare'
-        value: '************'
-      - key: '$..identifierare'
-        value: '************'
 activity-feed:
-  standard-version: ${ACTIVITY_FEED_STANDARD_VERSION:6.1}
+  standard-version: '6.1'
   # Load sample activities at startup for municipalities without activities (development and demo only).
-  seed: ${ACTIVITY_FEED_SEED:false}
+  seed: false
   producers:
-    - municipality-id: ${ACTIVITY_FEED_MUNICIPALITY_ID:2281}
-      name: ${ACTIVITY_FEED_PRODUCER_NAME:Referenskommunen}
-      prefix: ${ACTIVITY_FEED_PREFIX:REFKOM}
+    - municipality-id: '2281'
+      name: Referenskommunen
+      prefix: REFKOM

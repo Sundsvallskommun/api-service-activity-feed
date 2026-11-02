@@ -77,10 +77,9 @@ public class KundhandelseFragaResponse {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("KundhandelseFragaResponse [kundhandelser=").append(kundhandelser)
-			.append(", metadata=").append(metadata)
-			.append(", delfragor=").append(delfragor)
-			.append("]").toString();
+		return "KundhandelseFragaResponse [kundhandelser=" + kundhandelser +
+			", metadata=" + metadata +
+			", delfragor=" + delfragor +
+			"]";
 	}
 }

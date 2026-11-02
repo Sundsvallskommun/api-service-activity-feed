@@ -77,6 +77,29 @@ class ActivityQueryResourceFailureTest {
 	}
 
 	@Test
+	void invalidValueListsTheAllowedValues() {
+		postQuery("abc", """
+			{"fraga":{"parter":[{"arende":{"identifierare":"A-1","typ":"Okand"}},{"kund":{"identifierare":"199009090000","typ":"personnummer"}}],
+			 "behandling":{"sortering":[{"attribut":"DATUM","stigande":true}]}},"anvandare":"199009090000"}
+			""", "Bad request: fraga.behandling.sortering[0].attribut: sortering.attribut måste vara en av [RUBRIK, BESKRIVNING, PRODUCENT, TIDPUNKT, "
+			+ "KUNDHANDELSETYP, PRODUCENTARENDETKRAVERKUNDATGARD, PRODUCENTARENDETKLART]; "
+			+ "fraga.parter[0].arende.typ: arende.typ måste vara en av [Konsumentreferens, Producentarendereferens, Diarienummer, Kvittensnummer]; "
+			+ "fraga.parter[1].kund.typ: kund.typ måste vara en av [Personnummer, Organisationsnummer, Samordningsnummer]");
+		verifyNoInteractions(activityQueryService);
+	}
+
+	@Test
+	void rulesAcrossFieldsNameTheField() {
+		postQuery("abc", """
+			{"fraga":{"parter":[{}],"startDatum":"2026-09-02","slutDatum":"2026-09-01",
+			 "behandling":{"paginering":{"offset":0}}},"anvandare":"199009090000"}
+			""", "Bad request: fraga.behandling.paginering: Paginering kräver att sortering anges; "
+			+ "fraga.parter[0]: Varje part måste innehålla kund, ärende eller båda; "
+			+ "fraga.startDatum: startDatum får inte vara efter slutDatum");
+		verifyNoInteractions(activityQueryService);
+	}
+
+	@Test
 	void queryLimits() {
 		final var parties = Collections.nCopies(101, "{\"kund\":{\"identifierare\":\"199009090000\",\"typ\":\"Personnummer\"}}").stream().collect(Collectors.joining(","));
 		postQuery("abc", "{\"fraga\":{\"parter\":[" + parties + "]},\"anvandare\":\"199009090000\"}",
@@ -87,7 +110,7 @@ class ActivityQueryResourceFailureTest {
 			""", "Bad request: fraga.behandling.paginering.limit: paginering.limit får vara högst 1000");
 		postQuery("abc", """
 			{"fraga":{"parter":[{"kund":{"identifierare":"199009090000","typ":"Personnummer"}}],"kundhandelseTyper":["testkop.bygglov"]},"anvandare":"199009090000"}
-			""", "Bad request: fraga.kundhandelseTyper[0]: kundhandelseTyper har ogiltigt format");
+			""", "Bad request: fraga.kundhandelseTyper[0]: kundhandelseTyper ska ha formatet PRODUCENT, PRODUCENT.ARENDETYP eller PRODUCENT.ARENDETYP.HANDELSETYP (versaler, siffror, understreck)");
 		verifyNoInteractions(activityQueryService);
 	}
 

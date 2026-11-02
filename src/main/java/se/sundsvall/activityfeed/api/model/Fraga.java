@@ -7,8 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Objects;
-import se.sundsvall.activityfeed.api.validation.ActivityTypeFormat;
-import se.sundsvall.activityfeed.api.validation.Limits;
+import se.sundsvall.activityfeed.api.validation.ValidFraga;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
@@ -16,20 +15,27 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
  * The query itself: which parties it covers and how the response is filtered, sorted and paginated.
  */
 @Schema(description = "Frågan")
+@ValidFraga
 public class Fraga {
 
 	@Schema(description = "Parter som frågan gäller (kund, ärende eller båda)", requiredMode = REQUIRED)
 	@NotEmpty(message = "fraga.parter måste innehålla minst en part")
-	@Size(max = Limits.MAX_PARTIES, message = "fraga.parter får innehålla högst " + Limits.MAX_PARTIES + " parter")
+	// Each party becomes its own database query, so the number is capped. The standard sets no maximum.
+	@Size(max = 100, message = "fraga.parter får innehålla högst {max} parter")
 	private List<@Valid Part> parter;
 
 	@Schema(description = "Kundhändelsetyper, t.ex. REFKOM.BYGGLOV eller REFKOM.BYGGLOV.ANSOKAN_MOTTAGEN. Ett prefix matchar alla typer under det.")
-	@Size(max = Limits.MAX_ACTIVITY_TYPES, message = "kundhandelseTyper får innehålla högst " + Limits.MAX_ACTIVITY_TYPES + " typer")
-	private List<@Pattern(regexp = ActivityTypeFormat.QUERY_PATTERN, message = "kundhandelseTyper har ogiltigt format") @Size(max = ActivityTypeFormat.MAX_LENGTH, message = "kundhandelseTyper: för lång typ") String> kundhandelseTyper;
+	@Size(max = 100, message = "kundhandelseTyper får innehålla högst {max} typer")
+	// The pattern in the JSON schema of Skatteverket's API definition, plus a lone producer prefix (e.g. REFKOM) as in the
+	// schema's example. The producer must not reject queries that the forwarding service lets through. The length matches
+	// the column activity_type.
+	private List<@Pattern(regexp = "^[A-Z]+(?:\\.[A-Z0-9_.]+)?$", message = "kundhandelseTyper ska ha formatet PRODUCENT, PRODUCENT.ARENDETYP eller PRODUCENT.ARENDETYP.HANDELSETYP (versaler, siffror, understreck)") @Size(
+		max = 200,
+		message = "kundhandelseTyper: för lång typ") String> kundhandelseTyper;
 
 	@Schema(description = "Minst en av taggarna ska finnas på kundhändelsen")
-	@Size(max = Limits.MAX_TAGS, message = "taggar får innehålla högst " + Limits.MAX_TAGS + " taggar")
-	private List<@Size(max = Limits.MAX_TAG_LENGTH, message = "taggar: för lång tagg") String> taggar;
+	@Size(max = 100, message = "taggar får innehålla högst {max} taggar")
+	private List<@Size(max = 100, message = "taggar: för lång tagg") String> taggar;
 
 	@Schema(description = "Från och med datum (svensk tid)", examples = "2026-08-01")
 	@Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "startDatum ska ha formatet ÅÅÅÅ-MM-DD")
@@ -143,13 +149,12 @@ public class Fraga {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("Fraga [parter=").append(parter)
-			.append(", kundhandelseTyper=").append(kundhandelseTyper)
-			.append(", taggar=").append(taggar)
-			.append(", startDatum=").append(startDatum)
-			.append(", slutDatum=").append(slutDatum)
-			.append(", behandling=").append(behandling)
-			.append("]").toString();
+		return "Fraga [parter=" + parter +
+			", kundhandelseTyper=" + kundhandelseTyper +
+			", taggar=" + taggar +
+			", startDatum=" + startDatum +
+			", slutDatum=" + slutDatum +
+			", behandling=" + behandling +
+			"]";
 	}
 }

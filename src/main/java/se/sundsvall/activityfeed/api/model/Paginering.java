@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.util.Objects;
-import se.sundsvall.activityfeed.api.validation.Limits;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
@@ -19,7 +18,7 @@ public class Paginering {
 
 	@Schema(examples = "20")
 	@Min(1)
-	@Max(value = Limits.MAX_LIMIT, message = "paginering.limit får vara högst " + Limits.MAX_LIMIT)
+	@Max(value = 1000, message = "paginering.limit får vara högst {value}")
 	private Integer limit;
 
 	public static Paginering create() {
@@ -70,9 +69,8 @@ public class Paginering {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("Paginering [offset=").append(offset)
-			.append(", limit=").append(limit)
-			.append("]").toString();
+		return "Paginering [offset=" + offset +
+			", limit=" + limit +
+			"]";
 	}
 }

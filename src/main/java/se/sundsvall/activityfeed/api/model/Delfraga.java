@@ -105,12 +105,11 @@ public class Delfraga {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("Delfraga [producent=").append(producent)
-			.append(", part=").append(part)
-			.append(", status=").append(status)
-			.append(", message=").append(message)
-			.append(", httpCode=").append(httpCode)
-			.append("]").toString();
+		return "Delfraga [producent=" + producent +
+			", part=" + part +
+			", status=" + status +
+			", message=" + message +
+			", httpCode=" + httpCode +
+			"]";
 	}
 }

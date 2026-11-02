@@ -1,6 +1,5 @@
 package se.sundsvall.activityfeed.util;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -9,8 +8,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
+
 /**
- * Timestamps per RFC 3339 in responses, lenient on input. Date boundaries are interpreted in Swedish time.
+ * Timestamps per RFC 3339 in responses, always with the Swedish offset. Lenient on input. Date boundaries are
+ * interpreted in Swedish time.
  */
 public final class DateTimeUtil {
 
@@ -23,41 +25,45 @@ public final class DateTimeUtil {
 	/**
 	 * @param  value RFC 3339 (2026-09-01T10:15:00+02:00) or local Swedish time (2026-09-01T10:15:00 or 2026-09-01
 	 *               10:15:00)
-	 * @return       the point in time
+	 * @return       the point in time, with the given offset or the Swedish one for local time
 	 */
-	public static Instant parse(final String value) {
+	public static OffsetDateTime parse(final String value) {
 		try {
-			return OffsetDateTime.parse(value).toInstant();
+			return OffsetDateTime.parse(value);
 		} catch (final DateTimeParseException ignored) {
 			// try the local formats
 		}
 		try {
-			return LocalDateTime.parse(value).atZone(ZONE).toInstant();
+			return LocalDateTime.parse(value).atZone(ZONE).toOffsetDateTime();
 		} catch (final DateTimeParseException ignored) {
 			// try the next one
 		}
-		return LocalDateTime.parse(value, LOCAL_FORMAT).atZone(ZONE).toInstant();
+		return LocalDateTime.parse(value, LOCAL_FORMAT).atZone(ZONE).toOffsetDateTime();
 	}
 
-	public static String format(final Instant instant) {
-		return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(instant.atZone(ZONE).toOffsetDateTime());
+	/**
+	 * @param  dateTime a point in time with any offset
+	 * @return          RFC 3339 with the Swedish offset at that point in time
+	 */
+	public static String format(final OffsetDateTime dateTime) {
+		return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(dateTime.atZoneSameInstant(ZONE).toOffsetDateTime());
 	}
 
 	/**
 	 * @return the date at 00:00 Swedish time, or null
 	 */
-	public static Instant startOfDay(final String date) {
+	public static OffsetDateTime startOfDay(final String date) {
 		return Optional.ofNullable(date)
-			.map(d -> LocalDate.parse(d).atStartOfDay(ZONE).toInstant())
+			.map(d -> LocalDate.parse(d).atStartOfDay(ZONE).toOffsetDateTime())
 			.orElse(null);
 	}
 
 	/**
 	 * @return the date at 23:59:59.999 Swedish time, or null
 	 */
-	public static Instant endOfDay(final String date) {
+	public static OffsetDateTime endOfDay(final String date) {
 		return Optional.ofNullable(date)
-			.map(d -> LocalDate.parse(d).plusDays(1).atStartOfDay(ZONE).toInstant().minusMillis(1))
+			.map(d -> LocalDate.parse(d).plusDays(1).atStartOfDay(ZONE).toOffsetDateTime().minus(1, MILLIS))
 			.orElse(null);
 	}
 }

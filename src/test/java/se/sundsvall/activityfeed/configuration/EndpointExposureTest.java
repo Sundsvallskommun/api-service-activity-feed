@@ -63,22 +63,30 @@ class EndpointExposureTest {
 	}
 
 	@Test
-	void healthIsOpenWithoutDetails() {
+	void healthShowsDetails() {
 		webTestClient.get().uri("/actuator/health")
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody()
 			.jsonPath("$.status").isEqualTo("UP")
-			.jsonPath("$.components").doesNotExist();
+			.jsonPath("$.components.db.status").isEqualTo("UP");
 
 		webTestClient.get().uri("/actuator/health/readiness").exchange().expectStatus().isOk();
 		webTestClient.get().uri("/actuator/info").exchange().expectStatus().isOk();
 	}
 
+	/**
+	 * dept44's defaults: every endpoint except heapdump, threaddump and shutdown.
+	 */
 	@Test
-	void otherActuatorEndpointsAreNotExposed() {
+	void actuatorFollowsDept44Defaults() {
 		for (final var endpoint : new String[] {
-			"flyway", "env", "beans", "configprops", "loggers", "heapdump", "threaddump", "mappings"
+			"flyway", "env", "loggers", "mappings"
+		}) {
+			webTestClient.get().uri("/actuator/" + endpoint).exchange().expectStatus().isOk();
+		}
+		for (final var endpoint : new String[] {
+			"heapdump", "threaddump", "shutdown"
 		}) {
 			webTestClient.get().uri("/actuator/" + endpoint).exchange().expectStatus().isNotFound();
 		}

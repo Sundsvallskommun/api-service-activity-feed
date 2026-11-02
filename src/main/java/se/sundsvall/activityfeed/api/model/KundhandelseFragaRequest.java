@@ -74,9 +74,8 @@ public class KundhandelseFragaRequest {
 
 	@Override
 	public String toString() {
-		return new StringBuilder()
-			.append("KundhandelseFragaRequest [fraga=").append(fraga)
-			.append(", anvandare=").append(PiiMasker.maskPersonalNumber(anvandare))
-			.append("]").toString();
+		return "KundhandelseFragaRequest [fraga=" + fraga +
+			", anvandare=" + PiiMasker.maskPersonalNumber(anvandare) +
+			"]";
 	}
 }
