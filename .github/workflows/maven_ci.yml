@@ -1,8 +1,5 @@
 name: "Call Java CI with Maven"
 
-# Samma delade arbetsflöde som Sundsvalls kommuns api-service-tjänster (mvn -B verify med Java 25, TZ Europe/Stockholm).
-# Låst till en commit i stället för @main, så att en ändring i det delade repot inte ändrar bygget här oförhappandes.
-
 permissions:
   contents: read
 
@@ -19,6 +16,6 @@ on:
 
 jobs:
   shared-workflows:
-    uses: Sundsvallskommun/.github/.github/workflows/java-maven-ci.yml@05c412e1f7e77c1808145b4c844978a2f5903ca7
+    uses: Sundsvallskommun/.github/.github/workflows/java-maven-ci.yml@main
     with:
       java: "25"

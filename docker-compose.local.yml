@@ -1,6 +1,0 @@
-# Lokalt: publicera tjänsten på http://localhost:8080. I Dokploy används Domains i stället.
-#   docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
-services:
-  app:
-    ports:
-      - "8080:8080"

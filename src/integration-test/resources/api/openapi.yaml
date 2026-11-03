@@ -1,0 +1,769 @@
+openapi: 3.1.0
+info:
+  title: Mina ärenden – producent med ärendecache
+  description: "Producent enligt Mina ärendens standard för samlad ärendeåterkoppling.\
+    \ Kundhändelser lagras i en ärendecache (MariaDB) och lämnas ut via samma operation\
+    \ som Skatteverkets vidareförmedlingstjänst använder: POST /{municipalityId}/kundhandelseFragaSynkron."
+  contact: {}
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+  version: "1.0"
+servers:
+  - url: http://localhost:64053
+    description: Generated server url
+tags:
+  - name: Ärendecache
+    description: "Läs in, hämta och ta bort kundhändelser i cachen"
+  - name: Kundhändelser
+    description: Fråga om kundhändelser (Mina ärendens standard)
+paths:
+  /{municipalityId}/kundhandelser:
+    get:
+      tags:
+        - Ärendecache
+      summary: Antal kundhändelser i cachen för kommunen
+      operationId: antalKundhandelser
+      parameters:
+        - name: municipalityId
+          in: path
+          description: Kommun-id
+          required: true
+          schema:
+            type: string
+          example: 2281
+      responses:
+        "200":
+          description: Lyckat anrop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AntalKundhandelser"
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "500":
+          description: Internal Server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+    post:
+      tags:
+        - Ärendecache
+      summary: Lägg till eller ersätt kundhändelser
+      description: Skicka en lista med högst 1000 kundhändelser. Befintlig kundhändelse
+        med samma kundhandelseId ersätts. Listan sparas i en transaktion; vid 409
+        (samtidig inläsning av samma nya kundhandelseId) kan anropet skickas om oförändrat.
+      operationId: sparaKundhandelser
+      parameters:
+        - name: municipalityId
+          in: path
+          description: Kommun-id
+          required: true
+          schema:
+            type: string
+          example: 2281
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/NyKundhandelse"
+        required: true
+      responses:
+        "201":
+          description: Sparat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AntalKundhandelser"
+        "409":
+          description: Samtidig ändring
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "500":
+          description: Internal Server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /{municipalityId}/kundhandelseFragaSynkron:
+    post:
+      tags:
+        - Kundhändelser
+      summary: Hämta kundhändelser för en eller flera parter (synkron fråga)
+      description: "Besvarar frågan ur ärendecachen. Parter kan anges som kund, ä\
+        rende eller båda. Filtrera med kundhandelseTyper (prefix matchar underliggande\
+        \ typer), taggar och datumintervall. Sortering och paginering styrs med behandling;\
+        \ paginering kräver sortering."
+      operationId: kundhandelseFragaSynkron
+      parameters:
+        - name: municipalityId
+          in: path
+          description: Kommun-id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: skv_client_correlation_id
+          in: header
+          description: "Unikt id per anrop som följer anropskedjan från konsument via\
+          \ Skatteverket. Tjänstebeskrivningen anger UUID; API-definitionen tillå\
+          ter valfritt format. Här krävs skrivbara ASCII-tecken, högst 200 tecken."
+          required: true
+          schema:
+            type: string
+            pattern: "^(?=.*[\\x21-\\x7E])[\\x20-\\x7E]{1,200}$"
+          example: 0002aa29-49f2-4baf-be51-c7c39c9824b4
+        - name: Accept-Language
+          in: header
+          description: Önskat språk
+          required: false
+          schema:
+            type: string
+          example: sv
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KundhandelseFragaRequest"
+        required: true
+      responses:
+        "200":
+          description: Lyckat anrop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KundhandelseFragaResponse"
+        "400":
+          description: Frågan är inte korrekt ställd
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Kommunen är inte konfigurerad som producent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internt fel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /{municipalityId}/kundhandelser/{kundhandelseId}:
+    get:
+      tags:
+        - Ärendecache
+      summary: Hämta en kundhändelse ur cachen
+      operationId: hamtaKundhandelse
+      parameters:
+        - name: municipalityId
+          in: path
+          description: Kommun-id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: kundhandelseId
+          in: path
+          description: Kundhändelsens id
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+            minLength: 0
+          example: REFKOM-BYGG-2026-00123-1
+      responses:
+        "200":
+          description: Lyckat anrop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CachadKundhandelse"
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "500":
+          description: Internal Server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+    delete:
+      tags:
+        - Ärendecache
+      summary: Ta bort en kundhändelse ur cachen
+      operationId: taBortKundhandelse
+      parameters:
+        - name: municipalityId
+          in: path
+          description: Kommun-id
+          required: true
+          schema:
+            type: string
+          example: 2281
+        - name: kundhandelseId
+          in: path
+          description: Kundhändelsens id
+          required: true
+          schema:
+            type: string
+            maxLength: 100
+            minLength: 0
+          example: REFKOM-BYGG-2026-00123-1
+      responses:
+        "204":
+          description: Borttagen
+        "400":
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Problem"
+                  - $ref: "#/components/schemas/ConstraintViolationProblem"
+        "404":
+          description: Not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "500":
+          description: Internal Server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /api-docs:
+    get:
+      tags:
+        - API
+      summary: OpenAPI
+      operationId: getApiDocs
+      responses:
+        "200":
+          description: OK
+          content:
+            application/yaml:
+              schema:
+                type: string
+      x-auth-type: None
+      x-throttling-tier: Unlimited
+      x-wso2-mutual-ssl: Optional
+components:
+  schemas:
+    Problem:
+      type: object
+      properties:
+        title:
+          type: string
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        type:
+          type: string
+          format: uri
+        status:
+          type: integer
+          format: int32
+    Arende:
+      type: object
+      description: Används för att smalna av frågan till ett specifikt ärende
+      properties:
+        identifierare:
+          type: string
+          description: Ett värde som unikt identifierar ärendet
+          examples:
+            - BYGG-2026-00123
+          maxLength: 100
+          minLength: 0
+        typ:
+          type: string
+          description: Typ av identifierare
+          enum:
+            - Konsumentreferens
+            - Producentarendereferens
+            - Diarienummer
+            - Kvittensnummer
+          examples:
+            - Diarienummer
+          minLength: 1
+      required:
+        - identifierare
+        - typ
+    Kund:
+      type: object
+      description: Vem frågan gäller
+      properties:
+        identifierare:
+          type: string
+          description: "Ett värde som unikt identifierar kunden, 12 siffror"
+          examples:
+            - "199009090000"
+          minLength: 1
+          pattern: "^\\d{12}$"
+        tillagg:
+          type:
+            - string
+            - "null"
+          description: Löpnummer som skiljer flera enskilda firmor åt
+          maxLength: 20
+          minLength: 0
+        typ:
+          type: string
+          description: Typ av identifierare
+          enum:
+            - Personnummer
+            - Organisationsnummer
+            - Samordningsnummer
+          examples:
+            - Personnummer
+          minLength: 1
+      required:
+        - identifierare
+        - typ
+    NyKundhandelse:
+      type: object
+      description: "Kundhändelse att lägga i ärendecachen. producent, sprak och version\
+        \ fylls i från konfigurationen om de utelämnas."
+      properties:
+        kundhandelseId:
+          type: string
+          description: "Kundhändelsens id, satt av producenten och unikt inom kommunen. Samma id ersätter en befintlig kundhändelse."
+          examples:
+            - REFKOM-BYGG-2026-00123-3
+          maxLength: 100
+          minLength: 0
+        part:
+          $ref: "#/components/schemas/Part"
+          description: "Kunden, ärendet eller båda som kundhändelsen gäller"
+        rubrik:
+          type: string
+          description: Kort rubrik för kundhändelsen
+          examples:
+            - Beslut om bygglov
+          maxLength: 255
+          minLength: 0
+        beskrivning:
+          type: string
+          description: Beskrivning av kundhändelsen för kunden
+          examples:
+            - Bygglov har beviljats. Beslutet finns på Mina sidor.
+          maxLength: 65535
+          minLength: 0
+        sprak:
+          type: string
+          description: "Språket i rubrik och beskrivning enligt ISO 639-1. Utan värde blir det sv."
+          examples:
+            - sv
+          maxLength: 10
+          minLength: 0
+          pattern: "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8}+)*+$"
+        tidpunkt:
+          type: string
+          format: date-time
+          description: "Tidpunkt för händelsen enligt RFC 3339"
+          examples:
+            - 2026-09-20T10:00:00+02:00
+        kundhandelseTyp:
+          type: string
+          description: "Typ av kundhändelse i formatet PRODUCENTPREFIX.ARENDETYP.HANDELSETYP, där prefixet är kommunens. Minst tre delar åtskilda av punkt. Prefixet får innehålla A-Z, övriga delar A-Z, 0-9 och _."
+          examples:
+            - REFKOM.BYGGLOV.BESLUT
+          maxLength: 200
+          minLength: 0
+          pattern: "^[A-Z]++(?:\\.[A-Z0-9_]++){2,}+$"
+        producentarendetKraverKundatgard:
+          type: boolean
+          description: Om producentärendet väntar på en åtgärd från kunden
+        producentarendetKlart:
+          type: boolean
+          description: Om producentärendet är avslutat
+        version:
+          type: string
+          description: "Version av Mina ärendens standard. Utan värde blir det den konfigurerade versionen."
+          examples:
+            - "6.1"
+          maxLength: 10
+          minLength: 0
+          pattern: "^\\d++(?:\\.\\d++)*+$"
+        utokadInformation:
+          type: object
+          description: Utökad information (fritt JSON-objekt)
+        referenser:
+          type: object
+          description: Referenser (fritt JSON-objekt)
+        taggar:
+          type: array
+          description: Taggar som frågor kan filtrera på
+          examples:
+            - bygglov
+          items:
+            type: string
+            maxLength: 100
+            minLength: 0
+          maxItems: 100
+          minItems: 0
+      required:
+        - beskrivning
+        - kundhandelseId
+        - kundhandelseTyp
+        - part
+        - producentarendetKlart
+        - producentarendetKraverKundatgard
+        - rubrik
+        - tidpunkt
+    Part:
+      type: object
+      description: "En part identifieras som kund, ärende eller båda"
+      properties:
+        kund:
+          $ref: "#/components/schemas/Kund"
+        arende:
+          $ref: "#/components/schemas/Arende"
+    ConstraintViolationProblem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        status:
+          type: integer
+          format: int32
+        violations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Violation"
+        title:
+          type: string
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+    Violation:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+    AntalKundhandelser:
+      type: object
+      description: Antal kundhändelser
+      properties:
+        antal:
+          type: integer
+          format: int64
+          examples:
+            - 5
+      readOnly: true
+    ErrorResponse:
+      type: object
+      description: Felsvar för /kundhandelseFragaSynkron
+      properties:
+        message:
+          type: string
+          examples:
+            - "Bad request: fraga.parter måste innehålla minst en part"
+    Behandling:
+      type: object
+      description: Styr sortering och paginering av kundhändelserna i svaret. Paginering
+        kräver sortering.
+      properties:
+        sortering:
+          type: array
+          items:
+            $ref: "#/components/schemas/Sortering"
+        paginering:
+          $ref: "#/components/schemas/Paginering"
+    Fraga:
+      type: object
+      description: Frågan
+      properties:
+        parter:
+          type: array
+          description: "Parter som frågan gäller (kund, ärende eller båda)"
+          items:
+            $ref: "#/components/schemas/Part"
+          maxItems: 100
+          minItems: 0
+        kundhandelseTyper:
+          type: array
+          description: "Kundhändelsetyper, t.ex. REFKOM.BYGGLOV eller REFKOM.BYGGLOV.ANSOKAN_MOTTAGEN.\
+            \ Ett prefix matchar alla typer under det."
+          items:
+            type: string
+            maxLength: 200
+            minLength: 0
+            pattern: "^[A-Z]+(?:\\.[A-Z0-9_.]+)?$"
+          maxItems: 100
+          minItems: 0
+        taggar:
+          type: array
+          description: Minst en av taggarna ska finnas på kundhändelsen
+          items:
+            type: string
+            maxLength: 100
+            minLength: 0
+          maxItems: 100
+          minItems: 0
+        startDatum:
+          type: string
+          description: Från och med datum (svensk tid)
+          examples:
+            - 2026-08-01
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+        slutDatum:
+          type: string
+          description: Till och med datum (svensk tid)
+          examples:
+            - 2026-09-30
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+        behandling:
+          $ref: "#/components/schemas/Behandling"
+      required:
+        - parter
+    KundhandelseFragaRequest:
+      type: object
+      description: Fråga om kundhändelser
+      properties:
+        fraga:
+          $ref: "#/components/schemas/Fraga"
+        anvandare:
+          type: string
+          description: Personnummer för användaren som begär uppgifterna
+          examples:
+            - "194903012658"
+          minLength: 1
+          pattern: "^\\d{12}$"
+      required:
+        - anvandare
+        - fraga
+    Paginering:
+      type: object
+      description: Paginering. Utan limit lämnas alla kundhändelser från offset till
+        slutet.
+      properties:
+        offset:
+          type: integer
+          format: int32
+          examples:
+            - 0
+          minimum: 0
+        limit:
+          type: integer
+          format: int32
+          examples:
+            - 20
+          maximum: 1000
+          minimum: 1
+      required:
+        - offset
+    Sortering:
+      type: object
+      description: Sortering på ett attribut
+      properties:
+        attribut:
+          type: string
+          enum:
+            - RUBRIK
+            - BESKRIVNING
+            - PRODUCENT
+            - TIDPUNKT
+            - KUNDHANDELSETYP
+            - PRODUCENTARENDETKRAVERKUNDATGARD
+            - PRODUCENTARENDETKLART
+          examples:
+            - TIDPUNKT
+        stigande:
+          type: boolean
+      required:
+        - attribut
+        - stigande
+    Delfraga:
+      type: object
+      description: Utfall per producent och part
+      properties:
+        producent:
+          type: string
+        part:
+          $ref: "#/components/schemas/Part"
+        status:
+          type: string
+          examples:
+            - OK
+        message:
+          type: string
+        httpCode:
+          type: integer
+          format: int32
+          examples:
+            - 200
+    Kundhandelse:
+      type: object
+      description: En kundhändelse enligt Mina ärendens standard
+      properties:
+        kundhandelseId:
+          type: string
+          description: "Kundhändelsens id, satt av producenten och unikt inom kommunen"
+          examples:
+            - REFKOM-BYGG-2026-00123-1
+        rubrik:
+          type: string
+          description: Kort rubrik för kundhändelsen
+          examples:
+            - Ansökan om bygglov mottagen
+        beskrivning:
+          type: string
+          description: Beskrivning av kundhändelsen för kunden
+          examples:
+            - Vi har tagit emot din ansökan om bygglov.
+        sprak:
+          type: string
+          description: Språket i rubrik och beskrivning enligt ISO 639-1
+          examples:
+            - sv
+        producent:
+          type: string
+          description: Namnet på producenten som kundhändelsen kommer från
+          examples:
+            - Referenskommunen
+        tidpunkt:
+          type: string
+          description: "Tidpunkt för händelsen enligt RFC 3339, i svensk tid"
+          examples:
+            - 2026-09-01T10:15:00+02:00
+        kundhandelseTyp:
+          type: string
+          description: Typ av kundhändelse i formatet PRODUCENTPREFIX.ARENDETYP.HANDELSETYP
+          examples:
+            - REFKOM.BYGGLOV.ANSOKAN_MOTTAGEN
+        producentarendetKraverKundatgard:
+          type: boolean
+          description: Om producentärendet väntar på en åtgärd från kunden
+        producentarendetKlart:
+          type: boolean
+          description: Om producentärendet är avslutat
+        version:
+          type: string
+          description: Version av standarden som producenten implementerat
+          examples:
+            - "6.1"
+        utokadInformation:
+          type: object
+          description: Utökad information (fritt JSON-objekt)
+        referenser:
+          type: object
+          description: Referenser (fritt JSON-objekt)
+    KundhandelseFragaResponse:
+      type: object
+      description: Svar med kundhändelser per part
+      properties:
+        kundhandelser:
+          type: array
+          items:
+            $ref: "#/components/schemas/KundhandelserForPart"
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        delfragor:
+          type: array
+          items:
+            $ref: "#/components/schemas/Delfraga"
+    KundhandelserForPart:
+      type: object
+      description: Kundhändelser för en part
+      properties:
+        part:
+          $ref: "#/components/schemas/Part"
+        totaltAntalKundhandelser:
+          type: integer
+          format: int64
+          description: "Antal kundhändelser som matchar frågan, före paginering"
+        kundhandelserForPart:
+          type: array
+          items:
+            $ref: "#/components/schemas/Kundhandelse"
+    Metadata:
+      type: object
+      description: Frågan som svaret gäller
+      properties:
+        parter:
+          type: array
+          items:
+            $ref: "#/components/schemas/Part"
+        kundhandelseTyper:
+          type: array
+          items:
+            type: string
+        taggar:
+          type: array
+          items:
+            type: string
+        startDatum:
+          type: string
+        slutDatum:
+          type: string
+        onskatSprak:
+          type: string
+        behandling:
+          $ref: "#/components/schemas/Behandling"
+    CachadKundhandelse:
+      type: object
+      description: Kundhändelse i ärendecachen
+      properties:
+        part:
+          $ref: "#/components/schemas/Part"
+        kundhandelse:
+          $ref: "#/components/schemas/Kundhandelse"
+        taggar:
+          type: array
+          items:
+            type: string
+      readOnly: true
+  securitySchemes: {}

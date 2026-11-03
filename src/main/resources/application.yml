@@ -5,24 +5,19 @@ openapi:
   description: >-
     Producent enligt Mina ärendens standard för samlad ärendeåterkoppling. Kundhändelser lagras i en ärendecache
     (MariaDB) och lämnas ut via samma operation som Skatteverkets vidareförmedlingstjänst använder:
-    POST /{municipalityId}/kundhandelseFragaSynkron. Alla anrop kräver API-nyckel i headern X-API-Key.
+    POST /{municipalityId}/kundhandelseFragaSynkron.
 spring:
   application:
-    name: api-mina-arenden
+    name: api-activity-feed
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: ${DB_URL:jdbc:mariadb://localhost:3306/minaarenden}
-    username: ${DB_USER:minaarenden}
-    password: ${DB_PASSWORD:minaarenden}
   flyway:
-    # Schemat ägs av Flyway (src/main/resources/db/migration). Migreringar körs framåt vid varje start, aldrig clean,
-    # så att en omdeploy aldrig tömmer databasen.
+    # Flyway owns the schema (src/main/resources/db/migration). Migrations run forward on every start, never clean,
+    # so a redeploy never empties the database.
     enabled: true
     clean-disabled: true
     validate-on-migrate: true
     out-of-order: false
-    placeholders:
-      default_municipality_id: ${MINA_ARENDEN_MUNICIPALITY_ID:2281}
   jpa:
     open-in-view: false
     properties:
@@ -33,34 +28,18 @@ spring:
         persistence:
           schema-generation:
             database:
-              # Hibernate får bara kontrollera schemat, aldrig ändra det.
+              # Hibernate may only validate the schema, never change it.
               action: validate
 management:
   endpoint:
     health:
       probes:
         enabled: true
-# Payload-loggning, actuator-exponering och hälsodetaljer styrs av SakerhetsinstallningarEnvironmentPostProcessor,
-# eftersom dept44:s standardvärden annars går före den här filen.
-logbook:
-  body-filters:
-    # Om payload-loggningen ändå slås på maskeras personnummer i fråga och inläsning.
-    json-path:
-      - key: '$.anvandare'
-        value: '************'
-      - key: '$..identifierare'
-        value: '************'
-security:
-  api-key:
-    header-name: X-API-Key
-    # Kommaseparerade listor. Minst en nyckel krävs, annars startar inte tjänsten. Se README (Säkerhet).
-    fraga-keys: ${API_KEYS_FRAGA:}
-    admin-keys: ${API_KEYS_ADMIN:${ADMIN_API_KEY:}}
-minaarenden:
-  standard-version: ${MINA_ARENDEN_STANDARD_VERSION:6.1}
-  # Läs in exempelhändelser vid start för kommuner utan kundhändelser (endast utveckling/demo).
-  seed: ${MINA_ARENDEN_SEED:false}
-  producenter:
-    - municipality-id: ${MINA_ARENDEN_MUNICIPALITY_ID:2281}
-      namn: ${MINA_ARENDEN_PRODUCENT:Referenskommunen}
-      prefix: ${MINA_ARENDEN_PREFIX:REFKOM}
+activity-feed:
+  standard-version: '6.1'
+  # Load sample activities at startup for municipalities without activities (development and demo only).
+  seed: false
+  producers:
+    - municipality-id: '2281'
+      name: Referenskommunen
+      prefix: REFKOM

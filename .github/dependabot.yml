@@ -9,12 +9,6 @@ updates:
     schedule:
       interval: weekly
   - package-ecosystem: docker
-    directories:
-      - /docker
-      - /docker/db-prepare
-    schedule:
-      interval: weekly
-  - package-ecosystem: docker-compose
-    directory: /
+    directory: /docker
     schedule:
       interval: weekly
