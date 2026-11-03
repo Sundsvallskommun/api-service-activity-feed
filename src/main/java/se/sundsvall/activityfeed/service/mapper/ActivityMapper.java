@@ -17,6 +17,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.function.Predicate.not;
 
 /**
@@ -91,7 +92,7 @@ public final class ActivityMapper {
 			.withTitle(activity.getRubrik())
 			.withDescription(activity.getBeskrivning())
 			.withLanguage(Optional.ofNullable(blankToNull(activity.getSprak())).orElse(DEFAULT_LANGUAGE))
-			.withOccurredAt(keepIfSameInstant(entity.getOccurredAt(), DateTimeUtil.parse(activity.getTidpunkt())))
+			.withOccurredAt(occurredAt(entity.getOccurredAt(), activity.getTidpunkt()))
 			.withActivityType(activity.getKundhandelseTyp())
 			.withCustomerActionRequired(activity.getProducentarendetKraverKundatgard())
 			.withErrandCompleted(activity.getProducentarendetKlart())
@@ -124,10 +125,12 @@ public final class ActivityMapper {
 	}
 
 	/**
-	 * Keeps the stored value when the point in time is unchanged. Hibernate compares OffsetDateTime with equals, so a
-	 * different offset alone would count as a change and update the row.
+	 * Truncates the incoming value to milliseconds, which is what occurred_at holds, and keeps the stored value when the
+	 * point in time is unchanged. Hibernate compares OffsetDateTime with equals, so a different offset or nanoseconds the
+	 * database drops would otherwise count as a change and update the row.
 	 */
-	private static OffsetDateTime keepIfSameInstant(final OffsetDateTime current, final OffsetDateTime incoming) {
-		return current != null && current.isEqual(incoming) ? current : incoming;
+	private static OffsetDateTime occurredAt(final OffsetDateTime current, final OffsetDateTime incoming) {
+		final var truncated = incoming.truncatedTo(MILLIS);
+		return current != null && current.isEqual(truncated) ? current : truncated;
 	}
 }

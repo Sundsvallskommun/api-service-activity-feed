@@ -1,5 +1,7 @@
 package se.sundsvall.activityfeed.api.model;
 
+import java.time.OffsetDateTime;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,7 @@ class ModelTest {
 	@BeforeAll
 	static void setup() {
 		registerValueGenerator(() -> JsonNodeFactory.instance.objectNode().put("id", System.nanoTime()), JsonNode.class);
+		registerValueGenerator(() -> OffsetDateTime.now().plusSeconds(ThreadLocalRandom.current().nextLong(1, 4_000_000_000L)), OffsetDateTime.class);
 	}
 
 	static Stream<Class<?>> models() {

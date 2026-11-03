@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +25,7 @@ import se.sundsvall.dept44.common.validators.annotation.ValidMunicipalityId;
 @Validated
 @ConfigurationProperties(prefix = "activity-feed")
 public record ActivityFeedProperties(
-	@NotBlank @Pattern(regexp = "^\\d+(?:\\.\\d+)*$") @DefaultValue("6.1") String standardVersion,
+	@NotBlank @Pattern(regexp = "^\\d++(?:\\.\\d++)*+$") @Size(max = 10) @DefaultValue("6.1") String standardVersion,
 	@DefaultValue("false") boolean seed,
 	@NotEmpty List<@Valid Producer> producers) {
 

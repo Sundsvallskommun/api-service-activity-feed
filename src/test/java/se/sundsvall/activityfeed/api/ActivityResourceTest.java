@@ -53,6 +53,23 @@ class ActivityResourceTest {
 		verify(activityService).save("2281", activities);
 	}
 
+	/**
+	 * The length limit on version is the number of characters, not the version number.
+	 */
+	@Test
+	void versionAboveTenIsAccepted() {
+		final var activities = List.of(nyKundhandelse("TESTKOP-1").withVersion("10.1"), nyKundhandelse("TESTKOP-2").withVersion("6.10"));
+		when(activityService.save("2281", activities)).thenReturn(2);
+
+		webTestClient.post().uri(PATH)
+			.contentType(APPLICATION_JSON)
+			.bodyValue(activities)
+			.exchange()
+			.expectStatus().isCreated();
+
+		verify(activityService).save("2281", activities);
+	}
+
 	@Test
 	void hamtaKundhandelse() {
 		final var cached = CachadKundhandelse.create().withPart(part()).withKundhandelse(Kundhandelse.create().withKundhandelseId("TESTKOP-1")).withTaggar(List.of("bygglov"));

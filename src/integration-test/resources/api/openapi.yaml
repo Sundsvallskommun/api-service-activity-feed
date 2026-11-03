@@ -403,22 +403,21 @@ components:
             - sv
           maxLength: 10
           minLength: 0
-          pattern: "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+          pattern: "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8}+)*+$"
         tidpunkt:
           type: string
-          description: "Tidpunkt för händelsen enligt RFC 3339, eller lokal svensk tid ÅÅÅÅ-MM-DD HH:MM:SS"
+          format: date-time
+          description: "Tidpunkt för händelsen enligt RFC 3339"
           examples:
             - 2026-09-20T10:00:00+02:00
-          maxLength: 40
-          minLength: 0
         kundhandelseTyp:
           type: string
-          description: "Typ av kundhändelse i formatet PRODUCENTPREFIX.ARENDETYP.HANDELSETYP, där prefixet är kommunens"
+          description: "Typ av kundhändelse i formatet PRODUCENTPREFIX.ARENDETYP.HANDELSETYP, där prefixet är kommunens. Minst tre delar åtskilda av punkt. Prefixet får innehålla A-Z, övriga delar A-Z, 0-9 och _."
           examples:
             - REFKOM.BYGGLOV.BESLUT
           maxLength: 200
           minLength: 0
-          pattern: "^[A-Z]+(?:\\.[A-Z0-9_]+){2,}$"
+          pattern: "^[A-Z]++(?:\\.[A-Z0-9_]++){2,}+$"
         producentarendetKraverKundatgard:
           type: boolean
           description: Om producentärendet väntar på en åtgärd från kunden
@@ -432,7 +431,7 @@ components:
             - "6.1"
           maxLength: 10
           minLength: 0
-          pattern: ^\d+(?:\.\d+)*$
+          pattern: "^\\d++(?:\\.\\d++)*+$"
         utokadInformation:
           type: object
           description: Utökad information (fritt JSON-objekt)

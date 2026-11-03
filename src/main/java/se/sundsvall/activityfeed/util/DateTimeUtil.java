@@ -1,45 +1,22 @@
 package se.sundsvall.activityfeed.util;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
 
 /**
- * Timestamps per RFC 3339 in responses, always with the Swedish offset. Lenient on input. Date boundaries are
- * interpreted in Swedish time.
+ * Timestamps per RFC 3339 in responses, always with the Swedish offset. Date boundaries are interpreted in Swedish
+ * time.
  */
 public final class DateTimeUtil {
 
 	public static final ZoneId ZONE = ZoneId.of("Europe/Stockholm");
 
-	private static final DateTimeFormatter LOCAL_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
 	private DateTimeUtil() {}
-
-	/**
-	 * @param  value RFC 3339 (2026-09-01T10:15:00+02:00) or local Swedish time (2026-09-01T10:15:00 or 2026-09-01
-	 *               10:15:00)
-	 * @return       the point in time, with the given offset or the Swedish one for local time
-	 */
-	public static OffsetDateTime parse(final String value) {
-		try {
-			return OffsetDateTime.parse(value);
-		} catch (final DateTimeParseException _) {
-			// try the local formats
-		}
-		try {
-			return LocalDateTime.parse(value).atZone(ZONE).toOffsetDateTime();
-		} catch (final DateTimeParseException _) {
-			// try the next one
-		}
-		return LocalDateTime.parse(value, LOCAL_FORMAT).atZone(ZONE).toOffsetDateTime();
-	}
 
 	/**
 	 * @param  dateTime a point in time with any offset

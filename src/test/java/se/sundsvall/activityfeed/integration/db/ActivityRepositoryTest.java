@@ -123,11 +123,12 @@ class ActivityRepositoryTest {
 
 	/**
 	 * A resend of an unchanged activity writes nothing. +05:30 is neither UTC nor Swedish time, so the offset read back
-	 * from the database differs from the one sent in, wherever the tests run. Only the point in time is the same.
+	 * from the database differs from the one sent in, wherever the tests run. The nanoseconds do not fit in occurred_at,
+	 * which holds milliseconds. Only the point in time to the millisecond is the same.
 	 */
 	@Test
 	void resendOfUnchangedActivityDoesNotUpdateIt() {
-		final var activity = nyKundhandelse("TESTKOP-OMSANDNING-1").withTidpunkt("2026-09-20T13:30:00+05:30");
+		final var activity = nyKundhandelse("TESTKOP-OMSANDNING-1").withTidpunkt(OffsetDateTime.parse("2026-09-20T13:30:00.123456789+05:30"));
 		repository.saveAndFlush(ActivityMapper.toEntity(MUNICIPALITY_ID, PRODUCER, "6.1", activity, ActivityEntity.create()));
 		entityManager.clear();
 

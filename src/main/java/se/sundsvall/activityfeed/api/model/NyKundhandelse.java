@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 import tools.jackson.databind.JsonNode;
@@ -15,6 +16,11 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 /**
  * Ingest into the activity cache: an activity and the party it concerns. The length limits match the columns in the
  * activity table, so an error gives a 400 that names the field instead of a database error.
+ *
+ * <p>
+ * The patterns use possessive quantifiers (++, *+). Bean Validation runs the pattern on the whole value, whatever its
+ * length, and a repeated group in a Java regex recurses once per repetition, so a long value would otherwise overflow
+ * the stack.
  */
 @Schema(description = "Kundhändelse att lägga i ärendecachen. producent, sprak och version fylls i från konfigurationen om de utelämnas.")
 public class NyKundhandelse {
@@ -42,25 +48,23 @@ public class NyKundhandelse {
 	private String beskrivning;
 
 	@Schema(description = "Språket i rubrik och beskrivning enligt ISO 639-1. Utan värde blir det sv.", examples = "sv")
-	@Pattern(regexp = "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$", message = "sprak ska vara en språkkod enligt ISO 639-1, t.ex. sv")
+	@Pattern(regexp = "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8}+)*+$", message = "sprak ska vara en språkkod enligt ISO 639-1, t.ex. sv")
 	@Size(max = 10)
 	private String sprak;
 
-	@Schema(description = "Tidpunkt för händelsen enligt RFC 3339, eller lokal svensk tid ÅÅÅÅ-MM-DD HH:MM:SS",
-		examples = "2026-09-20T10:00:00+02:00",
-		requiredMode = REQUIRED)
-	@NotBlank
-	@Size(max = 40)
-	private String tidpunkt;
+	@Schema(description = "Tidpunkt för händelsen enligt RFC 3339", examples = "2026-09-20T10:00:00+02:00", requiredMode = REQUIRED)
+	@NotNull
+	private OffsetDateTime tidpunkt;
 
-	@Schema(description = "Typ av kundhändelse i formatet PRODUCENTPREFIX.ARENDETYP.HANDELSETYP, där prefixet är kommunens",
+	@Schema(description = "Typ av kundhändelse i formatet PRODUCENTPREFIX.ARENDETYP.HANDELSETYP, där prefixet är kommunens. Minst tre delar åtskilda av punkt. "
+		+ "Prefixet får innehålla A-Z, övriga delar A-Z, 0-9 och _.",
 		examples = "REFKOM.BYGGLOV.BESLUT",
 		requiredMode = REQUIRED)
 	@NotBlank
 	// Strict for the producer's own data: at least three parts (producer, producer errand type, activity type), no empty
 	// parts. The length matches the column activity_type.
 	@Size(max = 200)
-	@Pattern(regexp = "^[A-Z]+(?:\\.[A-Z0-9_]+){2,}$", message = "kundhandelseTyp ska ha formatet PRODUCENT.ARENDETYP.HANDELSETYP (versaler, siffror, understreck)")
+	@Pattern(regexp = "^[A-Z]++(?:\\.[A-Z0-9_]++){2,}+$", message = "kundhandelseTyp ska bestå av minst tre delar åtskilda av punkt, t.ex. REFKOM.BYGGLOV.BESLUT. Prefixet får innehålla A-Z, övriga delar A-Z, 0-9 och _")
 	private String kundhandelseTyp;
 
 	@Schema(description = "Om producentärendet väntar på en åtgärd från kunden", requiredMode = REQUIRED)
@@ -72,8 +76,8 @@ public class NyKundhandelse {
 	private Boolean producentarendetKlart;
 
 	@Schema(description = "Version av Mina ärendens standard. Utan värde blir det den konfigurerade versionen.", examples = "6.1")
-	@Pattern(regexp = "^\\d+(?:\\.\\d+)*$", message = "version ska anges som t.ex. 6.1")
-	@Size(max = 10)
+	@Pattern(regexp = "^\\d++(?:\\.\\d++)*+$", message = "version ska anges som t.ex. 6.1")
+	@Size(max = 10, message = "version får vara högst {max} tecken")
 	private String version;
 
 	@Schema(types = "object", implementation = Object.class, description = "Utökad information (fritt JSON-objekt)")
@@ -155,15 +159,15 @@ public class NyKundhandelse {
 		return this;
 	}
 
-	public String getTidpunkt() {
+	public OffsetDateTime getTidpunkt() {
 		return tidpunkt;
 	}
 
-	public void setTidpunkt(final String tidpunkt) {
+	public void setTidpunkt(final OffsetDateTime tidpunkt) {
 		this.tidpunkt = tidpunkt;
 	}
 
-	public NyKundhandelse withTidpunkt(final String tidpunkt) {
+	public NyKundhandelse withTidpunkt(final OffsetDateTime tidpunkt) {
 		this.tidpunkt = tidpunkt;
 		return this;
 	}

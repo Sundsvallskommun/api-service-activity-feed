@@ -49,9 +49,10 @@ class ActivityQueryResource {
 	@PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@Operation(operationId = "kundhandelseFragaSynkron",
 		summary = "Hämta kundhändelser för en eller flera parter (synkron fråga)",
-		description = "Besvarar frågan ur ärendecachen. Parter kan anges som kund, ärende eller båda. Filtrera med kundhandelseTyper "
-			+ "(prefix matchar underliggande typer), taggar och datumintervall. Sortering och paginering styrs med behandling; "
-			+ "paginering kräver sortering.",
+		description = """
+			Besvarar frågan ur ärendecachen. Parter kan anges som kund, ärende eller båda. Filtrera med kundhandelseTyper \
+			(prefix matchar underliggande typer), taggar och datumintervall. Sortering och paginering styrs med behandling; \
+			paginering kräver sortering.""",
 		responses = {
 			@ApiResponse(responseCode = "200", description = "Lyckat anrop", useReturnTypeSchema = true),
 			@ApiResponse(responseCode = "400", description = "Frågan är inte korrekt ställd", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),

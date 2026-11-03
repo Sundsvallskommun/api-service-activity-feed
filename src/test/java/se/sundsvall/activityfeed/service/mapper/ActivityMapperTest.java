@@ -21,7 +21,7 @@ class ActivityMapperTest {
 
 	@Test
 	void toEntityFillsInDefaults() {
-		final var activity = nyKundhandelse("TESTKOP-1").withTidpunkt("2026-09-15 12:00:00");
+		final var activity = nyKundhandelse("TESTKOP-1").withTidpunkt(OffsetDateTime.parse("2026-09-15T12:00:00+02:00"));
 		activity.getPart().getKund().withTillagg(" ");
 
 		final var entity = ActivityMapper.toEntity(MUNICIPALITY_ID, PRODUCER, "6.1", activity, ActivityEntity.create());

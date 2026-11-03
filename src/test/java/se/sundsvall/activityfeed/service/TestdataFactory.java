@@ -43,7 +43,7 @@ public final class TestdataFactory {
 			.withPart(part())
 			.withRubrik("Beslut om bygglov")
 			.withBeskrivning("Bygglov har beviljats.")
-			.withTidpunkt("2026-09-20T10:00:00+02:00")
+			.withTidpunkt(OffsetDateTime.parse("2026-09-20T10:00:00+02:00"))
 			.withKundhandelseTyp("TESTKOP.BYGGLOV.BESLUT")
 			.withProducentarendetKraverKundatgard(false)
 			.withProducentarendetKlart(true)

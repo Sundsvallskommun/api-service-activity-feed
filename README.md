@@ -150,8 +150,8 @@ The response is `201` with `{"antal": 1}`. The same `kundhandelseId` within the 
 record. The service fills in `producent`, `sprak` (`sv`) and `version` from the configuration if they are left out.
 `kundhandelseTyp` must have at least three parts and start with the municipality's prefix. At most 1000 activities per
 request, saved in one transaction. On 409 (a concurrent load of the same new id) the request can be sent again
-unchanged. `tidpunkt` is accepted as RFC 3339 or local time `YYYY-MM-DD HH:MM:SS` and is always returned as RFC 3339
-with the Swedish time zone.
+unchanged. `tidpunkt` must be RFC 3339 with an offset, such as `2026-09-20T10:00:00+02:00`, and is always returned with
+the Swedish offset.
 
 There are also `GET /{municipalityId}/kundhandelser/{kundhandelseId}`,
 `DELETE /{municipalityId}/kundhandelser/{kundhandelseId}` and `GET /{municipalityId}/kundhandelser` (count).

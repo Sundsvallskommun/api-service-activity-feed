@@ -13,7 +13,7 @@
 		},
 		"rubrik": "Ansökan om bygglov mottagen (rättad)",
 		"beskrivning": "Vi har tagit emot din ansökan om bygglov för garage.",
-		"tidpunkt": "2026-08-20 09:12:00",
+		"tidpunkt": "2026-08-20T09:12:00+02:00",
 		"kundhandelseTyp": "TESTKOP.BYGGLOV.ANSOKAN_MOTTAGEN",
 		"producentarendetKraverKundatgard": false,
 		"producentarendetKlart": false,

@@ -11,9 +11,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Puts skv_client_correlation_id in the MDC (key skvClientCorrelationId) for the whole request, so log lines can be
- * traced to the call chain at Skatteverket. dept44's x-request-id stays in the MDC next to it. The controller validates
- * the format. This filter only lets valid values through, so the header cannot be used to tamper with the log.
+ * Puts the header skv_client_correlation_id in the MDC (key skvClientCorrelationId) for the whole request. The caller
+ * of the query interface is Skatteverket's forwarding service, which sends the header as defined in Skatteverket's API
+ * definition for Mina ärenden kundhändelser. With it in the MDC, every log line of a call can be found by the id
+ * Skatteverket knows the call by. dept44's x-request-id stays in the MDC next to it. The filter runs on every request,
+ * but only the query interface declares the header. On the cache interface a header that a caller sends anyway still
+ * goes through the same format check before it reaches the MDC.
+ *
+ * <p>
+ * The controller validates the format. This filter only lets valid values through, so the header cannot be used to
+ * tamper with the log.
  */
 @Component
 public class CorrelationIdFilter extends OncePerRequestFilter {
