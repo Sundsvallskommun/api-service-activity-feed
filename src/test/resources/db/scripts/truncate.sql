@@ -1,2 +1,2 @@
-DELETE FROM kundhandelse_tagg;
-DELETE FROM kundhandelse;
+DELETE FROM activity_tag;
+DELETE FROM activity;

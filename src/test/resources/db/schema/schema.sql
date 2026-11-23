@@ -1,54 +1,54 @@
 
-    create table kundhandelse (
-        municipality_id varchar(4) not null,
-        producentarendet_klart bit not null,
-        producentarendet_kraver_kundatgard bit not null,
-        andrad datetime(6),
-        id bigint not null auto_increment,
-        skapad datetime(6) not null,
-        tidpunkt datetime(6) not null,
-        sprak varchar(10) not null,
-        version varchar(10) not null,
-        kund_identifierare varchar(12),
-        kund_tillagg varchar(20),
-        kund_typ varchar(20),
-        arende_typ varchar(30),
-        arende_identifierare varchar(100),
-        kundhandelse_id varchar(100) not null,
-        kundhandelse_typ varchar(200) not null,
-        producent varchar(200) not null,
-        rubrik varchar(255) not null,
-        beskrivning text not null,
-        referenser text,
-        utokad_information text,
-        primary key (id)
-    ) engine=InnoDB;
+create table activity (
+                          customer_action_required bit not null,
+                          errand_completed bit not null,
+                          municipality_id varchar(4) not null,
+                          created datetime(6) not null,
+                          modified datetime(6),
+                          occurred_at datetime(6) not null,
+                          language varchar(10) not null,
+                          version varchar(10) not null,
+                          customer_identifier varchar(12),
+                          customer_suffix varchar(20),
+                          customer_type varchar(20),
+                          errand_type varchar(30),
+                          id varchar(36) not null,
+                          activity_id varchar(100) not null,
+                          errand_identifier varchar(100),
+                          activity_type varchar(200) not null,
+                          producer varchar(200) not null,
+                          title varchar(255) not null,
+                          description longtext not null,
+                          extended_information longtext,
+                          reference_data longtext,
+                          primary key (id)
+) engine=InnoDB;
 
-    create table kundhandelse_tagg (
-        kundhandelse_ref bigint not null,
-        tagg varchar(100) not null,
-        primary key (kundhandelse_ref, tagg)
-    ) engine=InnoDB;
+create table activity_tag (
+                              activity_ref varchar(36) not null,
+                              tag varchar(100) not null,
+                              primary key (activity_ref, tag)
+) engine=InnoDB;
 
-    create index ix_kundhandelse_kund 
-       on kundhandelse (municipality_id, kund_identifierare, kund_typ);
+create index ix_activity_customer
+    on activity (municipality_id, customer_identifier, customer_type);
 
-    create index ix_kundhandelse_arende 
-       on kundhandelse (municipality_id, arende_identifierare, arende_typ);
+create index ix_activity_errand
+    on activity (municipality_id, errand_identifier, errand_type);
 
-    create index ix_kundhandelse_tidpunkt 
-       on kundhandelse (tidpunkt);
+create index ix_activity_occurred_at
+    on activity (occurred_at);
 
-    create index ix_kundhandelse_typ 
-       on kundhandelse (kundhandelse_typ);
+create index ix_activity_type
+    on activity (activity_type);
 
-    alter table if exists kundhandelse 
-       add constraint uq_kundhandelse_municipality_id_kundhandelse_id unique (municipality_id, kundhandelse_id);
+alter table if exists activity
+    add constraint uq_activity_municipality_id_activity_id unique (municipality_id, activity_id);
 
-    create index ix_kundhandelse_tagg 
-       on kundhandelse_tagg (tagg);
+create index ix_activity_tag
+    on activity_tag (tag);
 
-    alter table if exists kundhandelse_tagg 
-       add constraint fk_tagg_kundhandelse 
-       foreign key (kundhandelse_ref) 
-       references kundhandelse (id);
+alter table if exists activity_tag
+    add constraint fk_activity_tag_activity
+        foreign key (activity_ref)
+            references activity (id);
